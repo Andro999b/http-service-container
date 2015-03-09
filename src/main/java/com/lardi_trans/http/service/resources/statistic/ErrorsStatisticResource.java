@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
@@ -24,7 +23,6 @@ public class ErrorsStatisticResource {
     Provider<MonitoringStatistics> monitoringStatisticsProvider;
 
     @GET
-    @Path("/")
     @Produces({"application/json"})
     public Response getStatistic(@PathParam("time") String timeWindowName) {
         MonitoringStatistics monitoringStatistics = monitoringStatisticsProvider.get();
