@@ -1,22 +1,21 @@
 package com.lardi_trans.http.service.resources;
 
 import com.lardi_trans.http.service.config.HttpServiceConfig;
-import org.glassfish.jersey.server.model.ResourceMethod;
-import org.glassfish.jersey.server.monitoring.MonitoringStatistics;
-import org.glassfish.jersey.server.monitoring.ResourceMethodStatistics;
-import org.glassfish.jersey.server.monitoring.ResourceStatistics;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import java.lang.management.*;
-import java.util.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
+import java.lang.management.RuntimeMXBean;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by Andrey on 08.03.2015.
@@ -24,25 +23,17 @@ import java.util.*;
 @Path("/")
 public class IndexResource {
     @Inject
-    Provider<MonitoringStatistics> monitoringStatisticsProvider;
-
-    @Inject
     HttpServiceConfig config;
 
     @GET
-    @Produces({"application/xml", "application/json"})
+    @Produces({"application/json"})
     @Path("config")
     public HttpServiceConfig getConfig(){
         return config;
     }
 
     @GET
-    @Path("stat")
-    public void getRequestStatistics(){
-    }
-
-    @GET
-    @Produces({"application/xml", "application/json"})
+    @Produces({"application/json"})
     public Map<String, Object> getIndex(){
         Map<String, Object> metrics = new LinkedHashMap<>();
 

@@ -1,4 +1,7 @@
 {
   "host": "localhost",
-  "port": 9999
+  "port": 9999,
+  "properties": {
+    "jersey.config.server.monitoring.statistics.enabled": true
+  }
 }

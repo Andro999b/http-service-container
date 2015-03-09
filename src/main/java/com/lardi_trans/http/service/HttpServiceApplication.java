@@ -1,9 +1,10 @@
 package com.lardi_trans.http.service;
 
 import com.lardi_trans.http.service.config.HttpServiceConfig;
+import com.lardi_trans.http.service.error.ExceptionHandler;
+import com.lardi_trans.http.service.error.WebApplicationExceptionHandler;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.ServerProperties;
 import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
@@ -27,8 +28,11 @@ public class HttpServiceApplication extends ResourceConfig{
         HttpServiceBinder binder = new HttpServiceBinder(config);
         register(binder);
 
+        //Global Exception handler
+        register(WebApplicationExceptionHandler.class);
+        register(ExceptionHandler.class);
+
         setProperties(config.getProperties());
-        property(ServerProperties.MONITORING_STATISTICS_MBEANS_ENABLED, "true");
     }
 
     protected void setSpringApplication(ApplicationContext context){
