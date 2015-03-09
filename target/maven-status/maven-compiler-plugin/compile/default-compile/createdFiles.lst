@@ -1,0 +1,8 @@
+com\lardi_trans\http\service\HttpServiceApplication$HttpServiceBinder.class
+com\lardi_trans\http\service\resources\IndexResource.class
+com\lardi_trans\http\service\Bootstrap.class
+com\lardi_trans\http\service\Bootstrap$1.class
+com\lardi_trans\http\service\HttpServiceApplication.class
+com\lardi_trans\http\service\resources\ExceptionHandle.class
+com\lardi_trans\http\service\config\HttpServiceConfig.class
+com\lardi_trans\http\service\HelloWorldBean.class
