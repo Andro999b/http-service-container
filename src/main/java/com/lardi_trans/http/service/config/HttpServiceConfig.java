@@ -1,7 +1,5 @@
 package com.lardi_trans.http.service.config;
 
-import com.sun.javafx.fxml.builder.URLBuilder;
-
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.ArrayList;
@@ -18,22 +16,22 @@ public class HttpServiceConfig {
     private int port = 9999;
     private String applicationClass;
     private List<String> resourcesPackages = new ArrayList<>();
-    private Map<String, String> properties = new HashMap<>();
+    private Map<String, Object> properties = new HashMap<>();
 
-    public void setPort(int port) {
-        this.port = port;
+    public String getHost() {
+        return host;
     }
 
     public void setHost(String host) {
         this.host = host;
     }
 
-    public String getHost() {
-        return host;
-    }
-
     public int getPort() {
         return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public List<String> getResourcesPackages() {
@@ -44,7 +42,7 @@ public class HttpServiceConfig {
         return UriBuilder.fromPath(path).scheme("http").host(host).port(port).build();
     }
 
-    public Map<String, String> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
