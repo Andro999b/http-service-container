@@ -31,8 +31,7 @@ public class Bootstrap {
 
         System.out.println("Start service at " + baseUri);
         System.out.println("Wadl available by " + baseUri + "/application.wadl");
-        System.out.println("Press any key for shutdown...");
-        System.in.read();
+        Thread.currentThread().join();
 
         doCorrectShutdown();
     }
