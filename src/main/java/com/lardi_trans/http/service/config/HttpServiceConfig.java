@@ -64,7 +64,7 @@ public class HttpServiceConfig {
         }
 
         if (!StringUtils.isEmpty(config.getConstantsUrl())) {
-            System.setProperty("soa_constnts_url", config.getConstantsUrl());
+            System.setProperty("soa_constants_url", config.getConstantsUrl());
         }
 
         return config;
