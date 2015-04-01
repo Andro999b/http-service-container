@@ -15,6 +15,10 @@ import java.util.List;
  * Created by Andrey on 08.03.2015.
  */
 public class HttpServiceApplication extends ResourceConfig{
+    public HttpServiceApplication() {
+        this(HttpServiceConfig.getConfiguration());
+    }
+
     public HttpServiceApplication(final HttpServiceConfig config) {
         //set resources scan packages
         List<String> findIn = new ArrayList<>(config.getResourcesPackages());
@@ -22,7 +26,7 @@ public class HttpServiceApplication extends ResourceConfig{
 
         packages(findIn.toArray(new String[findIn.size()]));
         //bind config
-        HttpServiceBinder binder = new HttpServiceBinder(config);
+        HttpConfigBinder binder = new HttpConfigBinder(config);
         register(binder);
 
         //Global Exception handler
@@ -36,10 +40,10 @@ public class HttpServiceApplication extends ResourceConfig{
         property("contextConfig", context);
     }
 
-    private static class HttpServiceBinder extends AbstractBinder {
+    private static class HttpConfigBinder extends AbstractBinder {
         private final HttpServiceConfig config;
 
-        public HttpServiceBinder(HttpServiceConfig config) {
+        public HttpConfigBinder(HttpServiceConfig config) {
             this.config = config;
         }
 

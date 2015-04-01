@@ -1,15 +1,16 @@
 package com.lardi_trans.http.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
+import com.lardi_trans.http.service.config.NetworkConfig;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 
 
 /**
@@ -20,97 +21,86 @@ public class Bootstrap {
 
     private Bootstrap(HttpServiceConfig config) throws Exception{
         URI baseUri = config.getServerURI();
-        server = GrizzlyHttpServerFactory.createHttpServer(baseUri, getApplication(config));
+        server = GrizzlyHttpServerFactory.createHttpServer(baseUri, getApplication(config), false);
+
+        configureServer(config);
+
+        System.out.println("Start service at " + baseUri);
+        try {
+            server.start();
+        } catch (final IOException ex) {
+            server.shutdownNow();
+            throw new Exception("fail to start server", ex);
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
-           @Override
+            @Override
             public void run() {
                 doCorrectShutdown();
             }
         });
-
-        System.out.println("Start service at " + baseUri);
         System.out.println("Wadl available by " + baseUri + "/application.wadl");
+
+        if (System.getProperty("soa_constants_url") == null) {
+            System.out.println("lardi constants soa not available");
+        }
+
         Thread.currentThread().join();
 
         doCorrectShutdown();
     }
 
-    private ResourceConfig getApplication(HttpServiceConfig config) throws Exception{
+    public static void main(String[] args) throws Exception {
+        new Bootstrap(HttpServiceConfig.getConfiguration());
+    }
+
+    private void configureServer(HttpServiceConfig config) {
+        server.getServerConfiguration().setJmxEnabled(true);
+
+        NetworkConfig networkConfig = config.getNetworkConfig();
+        if (networkConfig != null) {
+            NetworkListener listener = server.getListener("grizzly");
+
+            listener.setTransactionTimeout(networkConfig.getTransactionTimeout());
+
+            listener.getCompressionConfig().setCompressionMode(networkConfig.getCompression());
+
+            ThreadPoolConfig threadPoolConfig = listener.getTransport().getWorkerThreadPoolConfig();
+            threadPoolConfig.setCorePoolSize(networkConfig.getWorkersCoreSize());
+            threadPoolConfig.setMaxPoolSize(networkConfig.getWorkersMaxSize());
+            threadPoolConfig.setQueueLimit(networkConfig.getWorkersQueryLimit());
+        }
+    }
+
+    private ResourceConfig getApplication(HttpServiceConfig config) throws Exception {
         String applicationClassName = config.getApplicationClass();
 
-        if(StringUtils.isEmpty(applicationClassName)){
+        if (StringUtils.isEmpty(applicationClassName)) {
             return new HttpServiceApplication(config);
         }
 
-        try{
+        try {
             Class<?> applicationClass = Class.forName(applicationClassName);
-            if(HttpServiceApplication.class.isAssignableFrom(applicationClass)) {
-                return (HttpServiceApplication)applicationClass.getConstructor(HttpServiceConfig.class).newInstance(config);
-            }else{
+            if (HttpServiceApplication.class.isAssignableFrom(applicationClass)) {
+                return (HttpServiceApplication) applicationClass.getConstructor(HttpServiceConfig.class).newInstance(config);
+            } else {
                 throw new RuntimeException("applicationClass must inheritance from HttpServiceApplication!");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Fail to create application: " + applicationClassName);
             throw e;
         }
     }
 
-    private void doCorrectShutdown()  {
+    private void doCorrectShutdown() {
         System.out.println("Wait for http server shutdown...");
         try {
             server.shutdown().get();
             System.out.println("Shutdown ok...");
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Error while server shutdown!");
             e.printStackTrace();
         }
-    }
-
-    private static HttpServiceConfig getConfiguration() throws Exception{
-        HttpServiceConfig config;
-        File file;
-
-        String uri = System.getProperty("service.config");
-        if(uri != null){
-            file = new File(uri);
-        }else{
-            URL resource = Bootstrap.class.getClassLoader().getResource("config.json");
-            if(resource == null)
-                throw new RuntimeException("Can`t find config.json on classpath or service.config system property");
-
-            file = new File(resource.toURI());
-        }
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            config = objectMapper.readValue(file, HttpServiceConfig.class);
-        }catch (Exception e) {
-            System.out.println("Error while load config file: " + uri);
-            throw e;
-        }
-
-        config.setHost(System.getProperty("service.host", config.getHost()));
-
-        String alternativePort = System.getProperty("service.port");
-        if(alternativePort != null){
-            try {
-                config.setPort(Integer.parseInt(alternativePort));
-            }catch (NumberFormatException e){
-                System.out.println("Bad alternative port " + alternativePort +
-                        "! Port " + String.valueOf(config.getPort() + " will be used"));
-            }
-        }
-
-        return config;
-    }
-
-    private static void start() throws Exception {
-        new Bootstrap(getConfiguration());
-    }
-
-    public static void main(String[] args) throws Exception {
-       Bootstrap.start();
     }
 
 
