@@ -52,6 +52,8 @@ public class IndexResource {
         metrics.put("uptime", periodFormatter.print(uptime));
         metrics.put("startTime", new DateTime(runtimeMXBean.getStartTime()).toString("yyyy-MM-dd h:mm:ss a"));
 
+        double systemLoadAverage = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
+        metrics.put("systemLoad", systemLoadAverage);
         //memory
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
