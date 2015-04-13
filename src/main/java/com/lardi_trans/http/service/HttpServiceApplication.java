@@ -46,20 +46,10 @@ public class HttpServiceApplication extends ResourceConfig{
         register(MvcFeature.class);
         register(DefaultTemplateProcessor.class);
 
-        final Swagger swagger = Reader.read(getClasses());
-        swagger.setInfo(new Info().title(config.getTitle()));
-        swagger.setHost(config.getHost() + ":" + config.getPort());
-        swagger.setBasePath(config.getPath());
-
-        register(new AbstractBinder() {
-            @Override
-            protected void configure() {
-                bind(swagger).to(Swagger.class);
-            }
-        });
+        register(new SwaggerBinder(config));
     }
 
-    private static class HttpConfigBinder extends AbstractBinder {
+    private class HttpConfigBinder extends AbstractBinder {
         private final HttpServiceConfig config;
 
         public HttpConfigBinder(HttpServiceConfig config) {
@@ -69,6 +59,24 @@ public class HttpServiceApplication extends ResourceConfig{
         @Override
         protected void configure() {
             bind(config).to(HttpServiceConfig.class);
+        }
+    }
+
+    private class SwaggerBinder extends AbstractBinder {
+        private final HttpServiceConfig config;
+
+        public SwaggerBinder(HttpServiceConfig config) {
+            this.config = config;
+        }
+
+        @Override
+        protected void configure() {
+            Swagger swagger = Reader.read(getClasses());
+            swagger.setInfo(new Info().title(config.getTitle()));
+            swagger.setHost(config.getHost() + ":" + config.getPort());
+            swagger.setBasePath(config.getPath());
+
+            bind(swagger).to(Swagger.class);
         }
     }
 }

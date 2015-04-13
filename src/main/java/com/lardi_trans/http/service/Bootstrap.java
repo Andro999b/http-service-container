@@ -25,7 +25,7 @@ public class Bootstrap {
 
         configureServer(config);
 
-        System.out.println("Start service at " + baseUri);
+
         try {
             server.start();
         } catch (final IOException ex) {
@@ -39,7 +39,10 @@ public class Bootstrap {
                 doCorrectShutdown();
             }
         });
+
+        System.out.println("Start service at " + baseUri);
         System.out.println("Wadl available by " + baseUri + "/application.wadl");
+        System.out.println("Swagger api available by " + baseUri + "/api");
 
         if (System.getProperty("soa_constants_url") == null) {
             System.out.println("lardi constants soa not available");
