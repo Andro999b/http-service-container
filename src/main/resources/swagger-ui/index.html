@@ -28,10 +28,7 @@
                 dom_id: "swagger-ui-container",
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
                 onComplete: function (swaggerApi, swaggerUi) {
-                    //looks like a hach for CORS
-                    swaggerApi.host = window.location.host;
-                    swaggerApi.basePath = window.location.pathname;
-
+                    hackForCORS();
                     $('pre code').each(function (i, e) {
                         hljs.highlightBlock(e)
                     });
@@ -49,6 +46,25 @@
                 if ('console' in window) {
                     console.log.apply(console, arguments);
                 }
+            }
+
+            function hackForCORS() {
+                var api = window.swaggerUi.api;
+                var location = window.location;
+
+                for (var i1 in api.apisArray) {
+                    var module = api.apisArray[i1];
+                    for (var i2 in module.operationsArray) {
+                        var operation = module.operationsArray[i2];
+
+
+                        operation.host = location.host;
+                        operation.basePath = location.pathname;
+                    }
+                }
+
+                api.host = location.host;
+                api.baseUrl = location.pathname;
             }
         });
 
