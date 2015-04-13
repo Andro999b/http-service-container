@@ -1,5 +1,6 @@
 package com.lardi_trans.http.service.resources.statistic;
 
+import com.lardi_trans.http.service.api.annotation.*;
 import com.lardi_trans.http.service.error.HttpServiceError;
 import org.glassfish.jersey.server.monitoring.ExecutionStatistics;
 import org.glassfish.jersey.server.monitoring.MonitoringStatistics;
@@ -21,14 +22,20 @@ import java.util.Map;
  * Created by Andrey on 09.03.2015.
  */
 @Singleton
+@Produces({"application/json"})
+@ApiCategory("service")
 public class UrlStatisticResource {
     @Inject
     Provider<MonitoringStatistics> monitoringStatisticsProvider;
 
     @GET
     @Path("{time}")
-    @Produces({"application/json"})
-    public Response getStatistic(@PathParam("time") String timeWindowName) {
+    @ApiMethod(value = "Service requests monitoring")
+    @ApiResponses({
+            @ApiResponse("Statistics per request"),
+            @ApiResponse(value = "Statistic not enable", httpCode = 500)
+    })
+    public Response getStatistic(@ApiParam("time window {all,1s,15s,1m,15m,1h}") @PathParam("time") String timeWindowName) {
         MonitoringStatistics monitoringStatistics = monitoringStatisticsProvider.get();
         if (monitoringStatistics == null)
             return Response.serverError().entity(new HttpServiceError("Statistic not enable")).build();

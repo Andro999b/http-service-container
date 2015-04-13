@@ -1,5 +1,9 @@
 package com.lardi_trans.http.service.resources.statistic;
 
+import com.lardi_trans.http.service.api.annotation.ApiCategory;
+import com.lardi_trans.http.service.api.annotation.ApiMethod;
+import com.lardi_trans.http.service.api.annotation.ApiResponse;
+import com.lardi_trans.http.service.api.annotation.ApiResponses;
 import com.lardi_trans.http.service.error.HttpServiceError;
 import org.glassfish.jersey.server.monitoring.ExceptionMapperStatistics;
 import org.glassfish.jersey.server.monitoring.MonitoringStatistics;
@@ -8,7 +12,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -18,13 +21,19 @@ import java.util.Map;
  * Created by Andrey on 09.03.2015.
  */
 @Singleton
+@Produces({"application/json"})
+@ApiCategory("service")
 public class ErrorsStatisticResource {
     @Inject
     Provider<MonitoringStatistics> monitoringStatisticsProvider;
 
     @GET
-    @Produces({"application/json"})
-    public Response getStatistic(@PathParam("time") String timeWindowName) {
+    @ApiMethod(value = "Service errors monitoring")
+    @ApiResponses({
+            @ApiResponse("Statistics per exception"),
+            @ApiResponse(value = "Statistic not enable", httpCode = 500)
+    })
+    public Response getStatistic() {
         MonitoringStatistics monitoringStatistics = monitoringStatisticsProvider.get();
         if (monitoringStatistics == null)
             return Response.serverError().entity(new HttpServiceError("Statistic not enable")).build();

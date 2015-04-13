@@ -2,12 +2,12 @@ package com.lardi_trans.http.service;
 
 import com.lardi_trans.http.service.config.HttpServiceConfig;
 import com.lardi_trans.http.service.config.NetworkConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.URI;

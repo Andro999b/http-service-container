@@ -6,13 +6,13 @@
 
     <groupId>lardi-trans.com</groupId>
     <artifactId>http-service</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.7</version>
 
     <properties>
         <jersey.version>2.17</jersey.version>
-        <spring.version>4.1.5.RELEASE</spring.version>
         <joda-time.version>2.7</joda-time.version>
         <grizzly.version>2.3.16</grizzly.version>
+        <swagger.version>1.5.3-M1</swagger.version>
     </properties>
 
     <distributionManagement>
@@ -28,11 +28,22 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>${swagger.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-server</artifactId>
             <version>${grizzly.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
@@ -53,6 +64,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-mvc</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
+
+        <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>${jersey.version}</version>
@@ -62,12 +80,6 @@
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-grizzly2-http</artifactId>
             <version>${jersey.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
 
         <dependency>

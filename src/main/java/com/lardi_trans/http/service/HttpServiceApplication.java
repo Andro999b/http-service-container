@@ -1,11 +1,16 @@
 package com.lardi_trans.http.service;
 
+import com.lardi_trans.http.service.api.Reader;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
 import com.lardi_trans.http.service.error.ExceptionHandler;
 import com.lardi_trans.http.service.error.WebApplicationExceptionHandler;
+import com.lardi_trans.http.service.utils.DefaultTemplateProcessor;
+import com.lardi_trans.http.service.utils.JsonObjectMapping;
+import com.wordnik.swagger.models.Info;
+import com.wordnik.swagger.models.Swagger;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.context.ApplicationContext;
+import org.glassfish.jersey.server.mvc.MvcFeature;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +30,8 @@ public class HttpServiceApplication extends ResourceConfig{
         findIn.add("com.lardi_trans.http.service.resources");
 
         packages(findIn.toArray(new String[findIn.size()]));
+
+        register(JsonObjectMapping.class);
         //bind config
         HttpConfigBinder binder = new HttpConfigBinder(config);
         register(binder);
@@ -34,10 +41,22 @@ public class HttpServiceApplication extends ResourceConfig{
         register(ExceptionHandler.class);
 
         setProperties(config.getProperties());
-    }
 
-    protected void setSpringApplication(ApplicationContext context){
-        property("contextConfig", context);
+        //setup swagger
+        register(MvcFeature.class);
+        register(DefaultTemplateProcessor.class);
+
+        final Swagger swagger = Reader.read(getClasses());
+        swagger.setInfo(new Info().title(config.getTitle()));
+        swagger.setHost(config.getHost() + ":" + config.getPort());
+        swagger.setBasePath(config.getPath());
+
+        register(new AbstractBinder() {
+            @Override
+            protected void configure() {
+                bind(swagger).to(Swagger.class);
+            }
+        });
     }
 
     private static class HttpConfigBinder extends AbstractBinder {

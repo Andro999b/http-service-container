@@ -1,7 +1,7 @@
 package com.lardi_trans.http.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.File;
@@ -16,6 +16,7 @@ import java.util.Map;
  * Created by Andrey on 08.03.2015.
  */
 public class HttpServiceConfig {
+    private String title = "HTTP service";
     private NetworkConfig networkConfig = new NetworkConfig();
     private String host = "localhost";
     private String path = "";
@@ -68,6 +69,10 @@ public class HttpServiceConfig {
         }
 
         return config;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getHost() {

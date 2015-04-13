@@ -1,5 +1,7 @@
 package com.lardi_trans.http.service.resources;
 
+import com.lardi_trans.http.service.api.annotation.ApiCategory;
+import com.lardi_trans.http.service.api.annotation.ApiMethod;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -21,19 +23,23 @@ import java.util.Map;
  * Created by Andrey on 08.03.2015.
  */
 @Path("/")
-public class IndexResource {
+@ApiCategory("service")
+public class InfoResource {
     @Inject
     HttpServiceConfig config;
 
     @GET
-    @Produces({"application/json"})
     @Path("config")
+    @Produces({"application/json"})
+    @ApiMethod(value = "Service effective (with all default values) config file")
     public HttpServiceConfig getConfig(){
         return config;
     }
 
     @GET
+    @Path("info")
     @Produces({"application/json"})
+    @ApiMethod(value = "Service information. Like uptime, cpu usage, heap load and system properties")
     public Map<String, Object> getIndex(){
         Map<String, Object> metrics = new LinkedHashMap<>();
 
@@ -66,4 +72,10 @@ public class IndexResource {
 
         return metrics;
     }
+
+    @Path("")
+    public Class<ApiResource> getApi() {
+        return ApiResource.class;
+    }
 }
+
