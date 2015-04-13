@@ -51,6 +51,11 @@
             function hackForCORS() {
                 var api = window.swaggerUi.api;
                 var location = window.location;
+                var basePath = location.pathname;
+
+                if (basePath.length > 0 && basePath.charAt(basePath.length - 1) === "/") {
+                    basePath = basePath.substr(0, basePath.length - 1);
+                }
 
                 for (var i1 in api.apisArray) {
                     var module = api.apisArray[i1];
@@ -59,12 +64,12 @@
 
 
                         operation.host = location.host;
-                        operation.basePath = location.pathname;
+                        operation.basePath = basePath;
                     }
                 }
 
                 api.host = location.host;
-                api.baseUrl = location.pathname;
+                api.basePath = basePath;
             }
         });
 
