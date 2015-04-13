@@ -28,6 +28,10 @@
                 dom_id: "swagger-ui-container",
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
                 onComplete: function (swaggerApi, swaggerUi) {
+                    //looks like a hach for CORS
+                    swaggerApi.host = window.location.host;
+                    swaggerApi.basePath = window.location.pathname;
+
                     $('pre code').each(function (i, e) {
                         hljs.highlightBlock(e)
                     });
