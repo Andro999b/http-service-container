@@ -5,6 +5,8 @@ import com.wordnik.swagger.converter.ModelConverters;
 import com.wordnik.swagger.models.*;
 import com.wordnik.swagger.models.Path;
 import com.wordnik.swagger.models.parameters.Parameter;
+import com.wordnik.swagger.models.properties.ArrayProperty;
+import com.wordnik.swagger.models.properties.MapProperty;
 import com.wordnik.swagger.models.properties.Property;
 import com.wordnik.swagger.models.properties.RefProperty;
 import org.apache.commons.lang3.StringUtils;
@@ -213,15 +215,27 @@ public class Reader {
         ApiResponse apiResponse = method.getAnnotation(ApiResponse.class);
         if (apiResponses != null) {
             for (ApiResponse response : apiResponses.value()) {
-                readResponse(operation, response.model(), response.value(), response.httpCode());
+                readResponse(
+                        operation,
+                        response.model(),
+                        response.value(),
+                        response.httpCode(),
+                        response.container()
+                );
             }
         } else if (apiResponse != null) {
-            readResponse(operation, apiResponse.model(), apiResponse.value(), apiResponse.httpCode());
+            readResponse(
+                    operation,
+                    apiResponse.model(),
+                    apiResponse.value(),
+                    apiResponse.httpCode(),
+                    apiResponse.container()
+            );
         } else {
             responseClass = method.getReturnType();
             responseMsg = "success response";
             responseCode = 200;
-            readResponse(operation, responseClass, responseMsg, responseCode);
+            readResponse(operation, responseClass, responseMsg, responseCode, ApiContainerType.NONE);
         }
 
 
@@ -262,28 +276,37 @@ public class Reader {
         return operation;
     }
 
-    private void readResponse(Operation operation, Class<?> responseClass, String responseMsg, int responseCode) {
+    private void readResponse(Operation operation, Class<?> responseClass, String responseMsg, int responseCode, ApiContainerType container) {
         if (responseClass != null &&
                 !responseClass.equals(Void.class) &&
                 !responseClass.equals(javax.ws.rs.core.Response.class)) {
             if (isPrimitive(responseClass)) {
-                Property property = ModelConverters.getInstance().readAsProperty(responseClass);
-
-                operation.response(responseCode, new Response()
-                        .description(responseMsg)
-                        .schema(property));
+                addResponse(
+                        operation,
+                        ModelConverters.getInstance().readAsProperty(responseClass),
+                        responseMsg,
+                        responseCode,
+                        container
+                );
             } else {
                 Map<String, Model> models = ModelConverters.getInstance().read(responseClass);
                 if (models.size() == 0) {
-                    Property p = ModelConverters.getInstance().readAsProperty(responseClass);
-                    operation.response(responseCode, new Response()
-                            .description(responseMsg)
-                            .schema(p));
+                    addResponse(
+                            operation,
+                            ModelConverters.getInstance().readAsProperty(responseClass),
+                            responseMsg,
+                            responseCode,
+                            container
+                    );
                 } else {
                     for (String key : models.keySet()) {
-                        operation.response(responseCode, new Response()
-                                .description(responseMsg)
-                                .schema(new RefProperty().asDefault(key)));
+                        addResponse(
+                                operation,
+                                new RefProperty().asDefault(key),
+                                responseMsg,
+                                responseCode,
+                                container
+                        );
                         swagger.model(key, models.get(key));
                     }
                 }
@@ -295,6 +318,20 @@ public class Reader {
         } else {
             operation.response(responseCode, new Response().description(responseMsg));
         }
+    }
+
+    private void addResponse(Operation operation, Property property, String responseMsg, int responseCode, ApiContainerType container) {
+        switch (container) {
+            case ARRAY:
+                property = new ArrayProperty(property);
+                break;
+            case OBJECT:
+                property = new MapProperty(property);
+        }
+
+        operation.response(responseCode, new Response()
+                .description(responseMsg)
+                .schema(property));
     }
 
     private List<Parameter> extractParams(Method method) {

@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface ApiResponse {
     int httpCode() default 200;
-
     Class<?> model() default Void.class;
 
+    ApiContainerType container() default ApiContainerType.NONE;
     String value();
 }

@@ -2,6 +2,7 @@ package com.lardi_trans.http.service.resources;
 
 import com.lardi_trans.http.service.api.annotation.ApiCategory;
 import com.lardi_trans.http.service.api.annotation.ApiMethod;
+import com.lardi_trans.http.service.api.annotation.ApiResponse;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -31,7 +32,7 @@ public class InfoResource {
     @GET
     @Path("config")
     @Produces({"application/json"})
-    @ApiMethod(value = "Service effective (with all default values) config file")
+    @ApiMethod("Service effective (with all default values) config file")
     public HttpServiceConfig getConfig(){
         return config;
     }
@@ -39,7 +40,8 @@ public class InfoResource {
     @GET
     @Path("info")
     @Produces({"application/json"})
-    @ApiMethod(value = "Service information. Like uptime, cpu usage, heap load and system properties")
+    @ApiMethod("Service information")
+    @ApiResponse("uptime, start time, systemLoad, heap usage, systemProperties")
     public Map<String, Object> getIndex(){
         Map<String, Object> metrics = new LinkedHashMap<>();
 

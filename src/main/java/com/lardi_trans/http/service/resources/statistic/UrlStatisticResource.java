@@ -30,12 +30,12 @@ public class UrlStatisticResource {
 
     @GET
     @Path("{time}")
-    @ApiMethod(value = "Service requests monitoring")
+    @ApiMethod("Service requests monitoring")
     @ApiResponses({
             @ApiResponse("Statistics per request"),
             @ApiResponse(value = "Statistic not enable", httpCode = 500)
     })
-    public Response getStatistic(@ApiParam("time window {all,1s,15s,1m,15m,1h}") @PathParam("time") String timeWindowName) {
+    public Response getStatistic(@ApiParam("time window (all,1s,15s,1m,15m,1h)") @PathParam("time") String timeWindowName) {
         MonitoringStatistics monitoringStatistics = monitoringStatisticsProvider.get();
         if (monitoringStatistics == null)
             return Response.serverError().entity(new HttpServiceError("Statistic not enable")).build();

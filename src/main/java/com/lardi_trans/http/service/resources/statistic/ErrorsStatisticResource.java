@@ -28,7 +28,7 @@ public class ErrorsStatisticResource {
     Provider<MonitoringStatistics> monitoringStatisticsProvider;
 
     @GET
-    @ApiMethod(value = "Service errors monitoring")
+    @ApiMethod("Service errors monitoring")
     @ApiResponses({
             @ApiResponse("Statistics per exception"),
             @ApiResponse(value = "Statistic not enable", httpCode = 500)
