@@ -8,6 +8,9 @@ import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,6 +20,7 @@ import java.net.URI;
  * Created by Andrey on 08.03.2015.
  */
 public class Bootstrap {
+    final private static Logger LOGGER = LoggerFactory.getLogger(Bootstrap.class);
     final private HttpServer server;
 
     private Bootstrap(HttpServiceConfig config) throws Exception{
@@ -24,7 +28,6 @@ public class Bootstrap {
         server = GrizzlyHttpServerFactory.createHttpServer(baseUri, getApplication(config), false);
 
         configureServer(config);
-
 
         try {
             server.start();
@@ -40,12 +43,12 @@ public class Bootstrap {
             }
         });
 
-        System.out.println("Start service at " + baseUri);
-        System.out.println("Wadl available by " + baseUri + "/application.wadl");
-        System.out.println("Swagger api available by " + baseUri + "/api");
+        LOGGER.info("Start service at {}", baseUri);
+        LOGGER.info("Wadl available by {}/application.wadl", baseUri);
+        LOGGER.info("Swagger api available by {}/api", baseUri);
 
         if (System.getProperty("soa_constants_url") == null) {
-            System.out.println("lardi constants soa not available");
+            LOGGER.warn("lardi constants soa not available");
         }
 
         Thread.currentThread().join();
@@ -54,6 +57,9 @@ public class Bootstrap {
     }
 
     public static void main(String[] args) throws Exception {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+
         new Bootstrap(HttpServiceConfig.getConfiguration());
     }
 

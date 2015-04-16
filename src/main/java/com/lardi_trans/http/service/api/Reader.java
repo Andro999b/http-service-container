@@ -10,6 +10,8 @@ import com.wordnik.swagger.models.properties.MapProperty;
 import com.wordnik.swagger.models.properties.Property;
 import com.wordnik.swagger.models.properties.RefProperty;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import java.lang.annotation.Annotation;
@@ -22,6 +24,8 @@ import java.util.*;
  * Created by Andrey on 08.04.2015.
  */
 public class Reader {
+    final private static Logger LOGGER = LoggerFactory.getLogger(Reader.class);
+
     private Swagger swagger;
     private ParameterReader parameterReader;
 
@@ -30,16 +34,16 @@ public class Reader {
         this.parameterReader = new ParameterReader(swagger);
     }
 
-    public static Reader create() {
-        return new Reader();
-    }
-
     public static Swagger read(Set<Class<?>> cls) {
         Reader reader = new Reader();
+
+        LOGGER.info("Start generate api");
 
         for (Class<?> cl : cls) {
             reader.readResource(cl);
         }
+
+        LOGGER.info("Finish generate api");
 
         return reader.getSwagger();
     }

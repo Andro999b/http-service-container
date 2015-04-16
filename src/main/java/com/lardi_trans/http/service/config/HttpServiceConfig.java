@@ -2,6 +2,8 @@ package com.lardi_trans.http.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.File;
@@ -16,6 +18,8 @@ import java.util.Map;
  * Created by Andrey on 08.03.2015.
  */
 public class HttpServiceConfig {
+    final private static Logger LOGGER = LoggerFactory.getLogger(HttpServiceConfig.class);
+
     private String title = "HTTP service";
     private NetworkConfig networkConfig = new NetworkConfig();
     private String host = "localhost";
@@ -48,7 +52,7 @@ public class HttpServiceConfig {
             ObjectMapper objectMapper = new ObjectMapper();
             config = objectMapper.readValue(file, HttpServiceConfig.class);
         } catch (Exception e) {
-            System.out.println("Error while load config file: " + uri);
+            LOGGER.error("Error while load config file{} ", uri);
             throw new RuntimeException(e);
         }
 
@@ -59,8 +63,7 @@ public class HttpServiceConfig {
             try {
                 config.setPort(Integer.parseInt(alternativePort));
             } catch (NumberFormatException e) {
-                System.out.println("Bad alternative port " + alternativePort +
-                        "! Port " + String.valueOf(config.getPort() + " will be used"));
+                LOGGER.error("Bad alternative port {}! Port {} will be used", alternativePort, config.getPort());
             }
         }
 
