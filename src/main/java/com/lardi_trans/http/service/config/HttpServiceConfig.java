@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,32 +31,38 @@ public class HttpServiceConfig {
     private String constantsUrl;
     private List<String> resourcesPackages = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
+    private int slowRequestLogTime = 1000;
 
     private HttpServiceConfig() {
     }
 
     public static HttpServiceConfig getConfiguration() {
         HttpServiceConfig config;
-        File file;
+        File file = null;
 
         String uri = System.getProperty("service.config");
+
         try {
             if (uri != null) {
                 file = new File(uri);
             } else {
                 URL resource = HttpServiceConfig.class.getClassLoader().getResource("config.json");
-                if (resource == null)
-                    throw new RuntimeException("Can`t find config.json on classpath or service.config system property");
-
-                file = new File(resource.toURI());
+                if (resource != null) {
+                    file = new File(resource.toURI());
+                }
             }
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            config = objectMapper.readValue(file, HttpServiceConfig.class);
-        } catch (Exception e) {
-            LOGGER.error("Error while load config file{} ", uri);
-            throw new RuntimeException(e);
+            if (file != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                config = objectMapper.readValue(file, HttpServiceConfig.class);
+            } else {
+                config = new HttpServiceConfig();
+            }
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.error("Error to load configuration file", e);
+            throw new RuntimeException("Error to load configuration file", e);
         }
+
 
         config.setHost(System.getProperty("service.host", config.getHost()));
 
@@ -123,4 +131,7 @@ public class HttpServiceConfig {
     }
 
 
+    public int getSlowRequestLogTime() {
+        return slowRequestLogTime;
+    }
 }

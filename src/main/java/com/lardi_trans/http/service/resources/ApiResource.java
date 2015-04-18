@@ -1,12 +1,12 @@
 package com.lardi_trans.http.service.resources;
 
+import com.codahale.metrics.annotation.Metered;
 import com.lardi_trans.http.service.api.annotation.ApiIgnore;
 import com.lardi_trans.http.service.error.HttpServiceError;
 import com.wordnik.swagger.models.Swagger;
 import org.glassfish.jersey.server.mvc.Viewable;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 /**
  * Created by Andrey on 07.04.2015.
  */
-@Singleton
+@Path("/")
 @ApiIgnore
 public class ApiResource {
     @Inject
@@ -25,6 +25,7 @@ public class ApiResource {
     @GET
     @Path("api")
     @Produces({"application/json"})
+    @Metered
     public Response getApi() {
         if (swagger == null)
             return Response.serverError().entity(new HttpServiceError("Swagger api not enable")).build();

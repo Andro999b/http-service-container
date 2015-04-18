@@ -1,9 +1,18 @@
 package com.lardi_trans.http.service;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
+import com.codahale.metrics.health.HealthCheckRegistry;
+import com.codahale.metrics.health.SharedHealthCheckRegistries;
+import com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck;
+import com.codahale.metrics.jersey2.MetricsFeature;
+import com.codahale.metrics.jvm.*;
 import com.lardi_trans.http.service.api.Reader;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
 import com.lardi_trans.http.service.error.ExceptionHandler;
 import com.lardi_trans.http.service.error.WebApplicationExceptionHandler;
+import com.lardi_trans.http.service.resources.MetricsResource;
+import com.lardi_trans.http.service.utils.ApplicationListener;
 import com.lardi_trans.http.service.utils.DefaultTemplateProcessor;
 import com.lardi_trans.http.service.utils.JsonObjectMapping;
 import com.wordnik.swagger.models.Info;
@@ -12,6 +21,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.mvc.MvcFeature;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,11 +47,51 @@ public class HttpServiceApplication extends ResourceConfig{
         register(binder);
 
         //Global Exception handler
+        register(ApplicationListener.class);
         register(WebApplicationExceptionHandler.class);
         register(ExceptionHandler.class);
 
         setProperties(config.getProperties());
 
+        setupMetrics();
+        setupSwagger(config);
+    }
+
+    private void setupMetrics() {
+        if (!isProperty("metrics.disable")) {
+            //metrics
+            MetricRegistry metricRegistry;
+
+            if (!isProperty("metrics.disable.jvm")) {
+                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_CLASSES_METRIC);
+                metricRegistry.registerAll(new ClassLoadingGaugeSet());
+
+                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_MEMORY_METRIC);
+                metricRegistry.registerAll(new MemoryUsageGaugeSet());
+
+                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_GC_METRIC);
+                metricRegistry.registerAll(new GarbageCollectorMetricSet());
+
+                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_BUFFERS_METRIC);
+                metricRegistry.registerAll(new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
+
+                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_THREADS_METRIC);
+                metricRegistry.registerAll(new ThreadStatesGaugeSet());
+
+                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_FILES_METRIC);
+                metricRegistry.register("fileDescriptors", new FileDescriptorRatioGauge());
+            }
+
+            register(new MetricsFeature(MetricsResource.HTTP_SERVICE_METRIC_REGISTRY));
+
+            //health check
+            HealthCheckRegistry healthCheckRegistry = SharedHealthCheckRegistries
+                    .getOrCreate(MetricsResource.HTTP_SERVICE_HEALTH_CHECKS);
+            healthCheckRegistry.register("deadlocks", new ThreadDeadlockHealthCheck());
+        }
+    }
+
+    private void setupSwagger(HttpServiceConfig config) {
         //setup swagger
         register(MvcFeature.class);
         register(DefaultTemplateProcessor.class);

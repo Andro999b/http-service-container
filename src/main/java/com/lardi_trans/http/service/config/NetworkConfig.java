@@ -7,7 +7,7 @@ import org.glassfish.grizzly.http.CompressionConfig;
  */
 public class NetworkConfig {
     private CompressionConfig.CompressionMode compression = CompressionConfig.CompressionMode.FORCE;
-    private int transactionTimeout = 30;
+    private int transactionTimeout = 30;//send interrupt to worker
     private int workersCoreSize = 4;
     private int workersMaxSize = 200;
     private int workersQueryLimit = -1;

@@ -64,14 +64,11 @@ public class Bootstrap {
     }
 
     private void configureServer(HttpServiceConfig config) {
-        server.getServerConfiguration().setJmxEnabled(true);
-
         NetworkConfig networkConfig = config.getNetworkConfig();
         if (networkConfig != null) {
             NetworkListener listener = server.getListener("grizzly");
 
             listener.setTransactionTimeout(networkConfig.getTransactionTimeout());
-
             listener.getCompressionConfig().setCompressionMode(networkConfig.getCompression());
 
             ThreadPoolConfig threadPoolConfig = listener.getTransport().getWorkerThreadPoolConfig();
@@ -111,6 +108,4 @@ public class Bootstrap {
             e.printStackTrace();
         }
     }
-
-
 }
