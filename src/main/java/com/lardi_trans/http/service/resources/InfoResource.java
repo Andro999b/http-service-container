@@ -1,19 +1,14 @@
 package com.lardi_trans.http.service.resources;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
+import com.codahale.metrics.health.HealthCheck;
+import com.codahale.metrics.health.SharedHealthCheckRegistries;
 import com.codahale.metrics.jvm.ThreadDump;
-import com.lardi_trans.http.service.api.annotation.ApiCategory;
-import com.lardi_trans.http.service.api.annotation.ApiIgnore;
-import com.lardi_trans.http.service.api.annotation.ApiMethod;
-import com.lardi_trans.http.service.api.annotation.ApiResponse;
+import com.lardi_trans.http.service.api.annotation.*;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
-import com.lardi_trans.http.service.utils.HtmlAppender;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -21,6 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
+import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
@@ -87,7 +83,7 @@ public class InfoResource {
     }
 
     @GET
-    @Path("info/threads/dump")
+    @Path("threads/dump")
     @Produces({"text/plain"})
     @ApiIgnore
     public StreamingOutput getThreadsDump() throws Exception {
@@ -103,20 +99,17 @@ public class InfoResource {
     }
 
     @GET
-    @Path("log")
-    @Produces({"text/html"})
-    @ApiIgnore
-    public String getLog() {
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+    @Path("health")
+    @ApiMethod("Return service health checks")
+    @ApiResponses({
+            @ApiResponse("Service health checks"),
+            @ApiResponse(value = "Metrics disabled", httpCode = 500)
+    })
+    public Map<String, HealthCheck.Result> getHealthCheck() {
+        if (SharedHealthCheckRegistries.names().contains("healthCheck"))
+            return SharedHealthCheckRegistries.getOrCreate("healthCheck").runHealthChecks();
 
-        HtmlAppender appender = (HtmlAppender) logger.getAppender("HTML");
-
-        if (appender != null) {
-            return appender.print();
-        }
-
-        return "Html log not available. Check you logback config";
+        throw new WebServiceException("Metrics not available");
     }
 }
 

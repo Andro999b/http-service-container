@@ -1,5 +1,7 @@
 package com.lardi_trans.http.service;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.health.HealthCheckRegistry;
@@ -11,15 +13,21 @@ import com.lardi_trans.http.service.api.Reader;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
 import com.lardi_trans.http.service.error.ExceptionHandler;
 import com.lardi_trans.http.service.error.WebApplicationExceptionHandler;
-import com.lardi_trans.http.service.resources.MetricsResource;
+import com.lardi_trans.http.service.optional.JvmMetricsResource;
+import com.lardi_trans.http.service.optional.LogResource;
+import com.lardi_trans.http.service.optional.MetricsResource;
+import com.lardi_trans.http.service.optional.StatisticResource;
 import com.lardi_trans.http.service.utils.ApplicationListener;
 import com.lardi_trans.http.service.utils.DefaultTemplateProcessor;
+import com.lardi_trans.http.service.utils.HtmlAppender;
 import com.lardi_trans.http.service.utils.JsonObjectMapping;
 import com.wordnik.swagger.models.Info;
 import com.wordnik.swagger.models.Swagger;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 import org.glassfish.jersey.server.mvc.MvcFeature;
+import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -46,49 +54,71 @@ public class HttpServiceApplication extends ResourceConfig{
         HttpConfigBinder binder = new HttpConfigBinder(config);
         register(binder);
 
+        //application listener
+        register(WebApplicationExceptionHandler.class);
+
         //Global Exception handler
         register(ApplicationListener.class);
-        register(WebApplicationExceptionHandler.class);
         register(ExceptionHandler.class);
 
         setProperties(config.getProperties());
 
+        setupLog();
         setupMetrics();
+        setupStatistic();
         setupSwagger(config);
     }
 
+    private void setupStatistic() {
+        if (isProperty(ServerProperties.MONITORING_ENABLED)) {
+            register(StatisticResource.class);
+        }
+    }
+
+    private void setupLog() {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+
+        HtmlAppender appender = (HtmlAppender) logger.getAppender("HTML");
+
+        if (appender != null) {
+            register(LogResource.class);
+        }
+    }
+
     private void setupMetrics() {
-        if (!isProperty("metrics.disable")) {
+        if (isProperty("metrics.enable")) {
             //metrics
             MetricRegistry metricRegistry;
 
-            if (!isProperty("metrics.disable.jvm")) {
-                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_CLASSES_METRIC);
+            if (isProperty("metrics.enable.jvm")) {
+                metricRegistry = SharedMetricRegistries.getOrCreate(JvmMetricsResource.JVM_CLASSES_METRIC);
                 metricRegistry.registerAll(new ClassLoadingGaugeSet());
 
-                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_MEMORY_METRIC);
+                metricRegistry = SharedMetricRegistries.getOrCreate(JvmMetricsResource.JVM_MEMORY_METRIC);
                 metricRegistry.registerAll(new MemoryUsageGaugeSet());
 
-                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_GC_METRIC);
+                metricRegistry = SharedMetricRegistries.getOrCreate(JvmMetricsResource.JVM_GC_METRIC);
                 metricRegistry.registerAll(new GarbageCollectorMetricSet());
 
-                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_BUFFERS_METRIC);
+                metricRegistry = SharedMetricRegistries.getOrCreate(JvmMetricsResource.JVM_BUFFERS_METRIC);
                 metricRegistry.registerAll(new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
 
-                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_THREADS_METRIC);
+                metricRegistry = SharedMetricRegistries.getOrCreate(JvmMetricsResource.JVM_THREADS_METRIC);
                 metricRegistry.registerAll(new ThreadStatesGaugeSet());
 
-                metricRegistry = SharedMetricRegistries.getOrCreate(MetricsResource.JVM_FILES_METRIC);
+                metricRegistry = SharedMetricRegistries.getOrCreate(JvmMetricsResource.JVM_FILES_METRIC);
                 metricRegistry.register("fileDescriptors", new FileDescriptorRatioGauge());
+                register(JvmMetricsResource.class);
             }
 
             register(new MetricsFeature(MetricsResource.HTTP_SERVICE_METRIC_REGISTRY));
-
-            //health check
-            HealthCheckRegistry healthCheckRegistry = SharedHealthCheckRegistries
-                    .getOrCreate(MetricsResource.HTTP_SERVICE_HEALTH_CHECKS);
-            healthCheckRegistry.register("deadlocks", new ThreadDeadlockHealthCheck());
+            register(MetricsResource.class);
         }
+
+        //health check
+        HealthCheckRegistry healthCheckRegistry = SharedHealthCheckRegistries.getOrCreate("healthCheck");
+        healthCheckRegistry.register("deadlocks", new ThreadDeadlockHealthCheck());
     }
 
     private void setupSwagger(HttpServiceConfig config) {
