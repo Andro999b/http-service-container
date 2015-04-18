@@ -22,6 +22,7 @@ public class HtmlAppender extends AppenderBase<ILoggingEvent> {
     public String print() {
         StringBuilder sb = new StringBuilder();
         HTMLLayout layout = new HTMLLayout();
+        layout.setPattern("%date%level%logger%msg");
         layout.setContext(getContext());
         layout.start();
 
