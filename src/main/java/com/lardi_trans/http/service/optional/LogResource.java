@@ -14,10 +14,10 @@ import javax.ws.rs.Produces;
  * Created by Andrey on 18.04.2015.
  */
 @Path("log")
+@ApiIgnore
 public class LogResource {
     @GET
     @Produces({"text/html"})
-    @ApiIgnore
     public String getLog() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);

@@ -137,9 +137,12 @@ public class Reader {
 
             addMethodDescription(resource, method, operation);
 
-            Path path = new Path();
+            Path path = swagger.getPath(operationPath);
+            if (path == null) {
+                path = new Path();
+                swagger.path(operationPath, path);
+            }
             path.set(httpMethod, operation);
-            swagger.path(operationPath, path);
         } else if (methodPathAnnotation != null) {
             Class<?> returnType = method.getReturnType();
             Class subResourceClass;

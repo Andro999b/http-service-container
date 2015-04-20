@@ -32,6 +32,7 @@ import java.util.Map;
  */
 @Path("/")
 @ApiCategory("service")
+@ApiIgnore
 public class InfoResource {
     @Inject
     HttpServiceConfig config;
