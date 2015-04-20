@@ -1,5 +1,7 @@
 <configuration debug="true">
-    <appender name="HTML" class="com.lardi_trans.http.service.utils.HtmlAppender"/>
+    <appender name="HTML" class="com.lardi_trans.http.service.utils.HtmlAppender">
+        <reversePrint>true</reversePrint>
+    </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

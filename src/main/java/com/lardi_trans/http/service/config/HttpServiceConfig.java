@@ -130,7 +130,6 @@ public class HttpServiceConfig {
         return networkConfig;
     }
 
-
     public int getSlowRequestLogTime() {
         return slowRequestLogTime;
     }

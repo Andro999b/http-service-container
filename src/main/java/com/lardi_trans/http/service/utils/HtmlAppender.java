@@ -6,6 +6,9 @@ import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.helpers.CyclicBuffer;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by Andrey on 18.04.2015.
  */
@@ -15,6 +18,7 @@ public class HtmlAppender extends AppenderBase<ILoggingEvent> {
 
     private CyclicBuffer<ILoggingEvent> cb = new CyclicBuffer<>(MAX_RECORDS);
     private String pattern;
+    private boolean reversePrint = false;
 
     @Override
     protected void append(ILoggingEvent event) {
@@ -30,6 +34,10 @@ public class HtmlAppender extends AppenderBase<ILoggingEvent> {
             pattern = DEFAULT_CONVERSION_PATTERN;
     }
 
+    public void setReversePrint(boolean reversePrint) {
+        this.reversePrint = reversePrint;
+    }
+
     public String print() {
         StringBuilder sb = new StringBuilder();
         HTMLLayout layout = new HTMLLayout();
@@ -39,7 +47,13 @@ public class HtmlAppender extends AppenderBase<ILoggingEvent> {
 
         sb.append(layout.getFileHeader());
         sb.append(layout.getPresentationHeader());
-        for (ILoggingEvent event : cb.asList()) {
+
+        List<ILoggingEvent> iLoggingEvents = cb.asList();
+
+        if(reversePrint)
+            Collections.reverse(iLoggingEvents);
+
+        for (ILoggingEvent event : iLoggingEvents) {
             sb.append(layout.doLayout(event));
         }
         sb.append(layout.getPresentationFooter());

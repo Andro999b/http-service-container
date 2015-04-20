@@ -25,7 +25,6 @@ public class ApiResource {
     @GET
     @Path("api")
     @Produces({"application/json"})
-    @Metered
     public Response getApi() {
         if (swagger == null)
             return Response.serverError().entity(new HttpServiceError("Swagger api not enable")).build();
