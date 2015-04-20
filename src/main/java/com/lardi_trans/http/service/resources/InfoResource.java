@@ -7,7 +7,6 @@ import com.codahale.metrics.health.SharedHealthCheckRegistries;
 import com.codahale.metrics.jvm.ThreadDump;
 import com.lardi_trans.http.service.api.annotation.*;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
-import com.lardi_trans.http.service.utils.OkResponse;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
@@ -18,7 +17,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -36,7 +34,6 @@ import java.util.Map;
  */
 @Path("/")
 @ApiCategory("service")
-@ApiIgnore
 public class InfoResource {
     @Inject
     HttpServiceConfig config;

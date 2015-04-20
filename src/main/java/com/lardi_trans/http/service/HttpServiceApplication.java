@@ -66,7 +66,7 @@ public class HttpServiceApplication extends ResourceConfig{
     }
 
     private void setupStatistic() {
-        if (isProperty(ServerProperties.MONITORING_ENABLED)) {
+        if (isProperty(ServerProperties.MONITORING_ENABLED) || isProperty(ServerProperties.MONITORING_STATISTICS_ENABLED)) {
             register(StatisticResource.class);
         }
     }
