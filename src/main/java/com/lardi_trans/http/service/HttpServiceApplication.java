@@ -38,10 +38,6 @@ import java.util.List;
  * Created by Andrey on 08.03.2015.
  */
 public class HttpServiceApplication extends ResourceConfig{
-    public HttpServiceApplication() {
-        this(HttpServiceConfig.getConfiguration());
-    }
-
     public HttpServiceApplication(final HttpServiceConfig config) {
         //set resources scan packages
         List<String> findIn = new ArrayList<>(config.getResourcesPackages());

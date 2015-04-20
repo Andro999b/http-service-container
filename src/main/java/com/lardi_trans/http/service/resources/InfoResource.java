@@ -1,10 +1,13 @@
 package com.lardi_trans.http.service.resources;
 
+import com.codahale.metrics.annotation.Metered;
+import com.codahale.metrics.annotation.Timed;
 import com.codahale.metrics.health.HealthCheck;
 import com.codahale.metrics.health.SharedHealthCheckRegistries;
 import com.codahale.metrics.jvm.ThreadDump;
 import com.lardi_trans.http.service.api.annotation.*;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
+import com.lardi_trans.http.service.utils.OkResponse;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
@@ -15,6 +18,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -40,6 +44,7 @@ public class InfoResource {
     @Path("config")
     @Produces({"application/json"})
     @ApiMethod("Service effective (with all default values) config file")
+    @Metered
     public HttpServiceConfig getConfig(){
         return config;
     }
@@ -49,6 +54,7 @@ public class InfoResource {
     @Produces({"application/json"})
     @ApiMethod("Service information")
     @ApiResponse("uptime, start time, systemLoad, heap usage, systemProperties")
+    @Timed
     public Map<String, Object> getIndex(){
         Map<String, Object> metrics = new LinkedHashMap<>();
 
@@ -103,13 +109,13 @@ public class InfoResource {
     @ApiMethod("Return service health checks")
     @ApiResponses({
             @ApiResponse("Service health checks"),
-            @ApiResponse(value = "Metrics disabled", httpCode = 500)
+            @ApiResponse(value = "Heathcheck not available", httpCode = 500)
     })
     public Map<String, HealthCheck.Result> getHealthCheck() {
         if (SharedHealthCheckRegistries.names().contains("healthCheck"))
             return SharedHealthCheckRegistries.getOrCreate("healthCheck").runHealthChecks();
 
-        throw new WebServiceException("Metrics not available");
+        throw new WebServiceException("Heathcheck not available");
     }
 }
 
