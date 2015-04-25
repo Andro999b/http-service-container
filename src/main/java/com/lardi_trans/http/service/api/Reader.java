@@ -1,7 +1,7 @@
 package com.lardi_trans.http.service.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lardi_trans.http.service.api.annotation.*;
-import com.wordnik.swagger.converter.ModelConverters;
 import com.wordnik.swagger.models.*;
 import com.wordnik.swagger.models.Path;
 import com.wordnik.swagger.models.parameters.Parameter;
@@ -23,16 +23,18 @@ import java.util.*;
  * Created by Andrey on 08.04.2015.
  */
 public class Reader {
+    private ModelReader modelReader;
     private Swagger swagger;
     private ParameterReader parameterReader;
 
-    private Reader() {
+    private Reader(ObjectMapper mapper) {
+        this.modelReader = new ModelReader(mapper);
         this.swagger = new Swagger();
-        this.parameterReader = new ParameterReader(swagger);
+        this.parameterReader = new ParameterReader(swagger, modelReader);
     }
 
-    public static Swagger read(Set<Class<?>> cls) {
-        Reader reader = new Reader();
+    public static Swagger read(Set<Class<?>> cls, ObjectMapper mapper) {
+        Reader reader = new Reader(mapper);
 
         for (Class<?> cl : cls) {
             reader.readResource(cl);
@@ -207,7 +209,7 @@ public class Reader {
         operation.operationId(method.getName());
 
         //response
-        Type responseType;
+        Type responseType = method.getGenericReturnType();
         String responseMsg;
         int responseCode;
 
@@ -217,7 +219,7 @@ public class Reader {
             for (ApiResponse response : apiResponses.value()) {
                 readResponse(
                         operation,
-                        response.model(),
+                        choseResponseModel(responseType, response.model()),
                         response.value(),
                         response.httpCode(),
                         response.container()
@@ -226,13 +228,12 @@ public class Reader {
         } else if (apiResponse != null) {
             readResponse(
                     operation,
-                    apiResponse.model(),
+                    choseResponseModel(responseType, apiResponse.model()),
                     apiResponse.value(),
                     apiResponse.httpCode(),
                     apiResponse.container()
             );
         } else {
-            responseType = method.getGenericReturnType();
             responseMsg = "success response";
             responseCode = 200;
             readResponse(operation, responseType, responseMsg, responseCode, ApiContainerType.NONE);
@@ -276,6 +277,13 @@ public class Reader {
         return operation;
     }
 
+    private Type choseResponseModel(Type responseType, Class model) {
+        if (!Void.class.isAssignableFrom(model))
+            return model;
+
+        return responseType;
+    }
+
     private void readResponse(Operation operation, Type responseType, String responseMsg, int responseCode, ApiContainerType container) {
         if (responseType == null) {
             operation.response(responseCode, new Response().description(responseMsg));
@@ -292,7 +300,7 @@ public class Reader {
         if (responseType instanceof ParameterizedType) {
             ParameterizedType pt = (ParameterizedType) responseType;
             for (Type type : pt.getActualTypeArguments()) {
-                models = ModelConverters.getInstance().readAll(type);
+                models = modelReader.readAll(type);
                 for (String key : models.keySet()) {
                     swagger.model(key, models.get(key));
                 }
@@ -302,17 +310,17 @@ public class Reader {
         if (isPrimitive(responseType)) {
             addResponse(
                     operation,
-                    ModelConverters.getInstance().readAsProperty(responseType),
+                    modelReader.readAsProperty(responseType),
                     responseMsg,
                     responseCode,
                     container
             );
         } else {
-            models = ModelConverters.getInstance().read(responseType);
+            models = modelReader.read(responseType);
             if (models.size() == 0) {
                 addResponse(
                         operation,
-                        ModelConverters.getInstance().readAsProperty(responseType),
+                        modelReader.readAsProperty(responseType),
                         responseMsg,
                         responseCode,
                         container
@@ -330,7 +338,7 @@ public class Reader {
                 }
             }
 
-            models = ModelConverters.getInstance().readAll(responseType);
+            models = modelReader.readAll(responseType);
             for (String key : models.keySet()) {
                 swagger.model(key, models.get(key));
             }
@@ -368,7 +376,7 @@ public class Reader {
     }
 
     boolean isPrimitive(Type cls) {
-        Property property = ModelConverters.getInstance().readAsProperty(cls);
+        Property property = modelReader.readAsProperty(cls);
 
         if (property == null)
             return false;

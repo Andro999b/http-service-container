@@ -2,7 +2,6 @@ package com.lardi_trans.http.service.api;
 
 import com.lardi_trans.http.service.api.annotation.ApiParam;
 import com.lardi_trans.http.service.api.annotation.Require;
-import com.wordnik.swagger.converter.ModelConverters;
 import com.wordnik.swagger.models.*;
 import com.wordnik.swagger.models.parameters.*;
 import com.wordnik.swagger.models.properties.Property;
@@ -20,9 +19,11 @@ import java.util.Map;
  */
 public class ParameterReader {
     private Swagger swagger;
+    private ModelReader modelReader;
 
-    public ParameterReader(Swagger swagger) {
+    public ParameterReader(Swagger swagger, ModelReader modelReader) {
         this.swagger = swagger;
+        this.modelReader = modelReader;
     }
 
     public List<Parameter> extractParameters(Annotation[] annotations, Class<?> cls) {
@@ -76,9 +77,9 @@ public class ParameterReader {
         if (cls.isArray()) {
             Class<?> innerType;
             innerType = cls.getComponentType();
-            Property innerProperty = ModelConverters.getInstance().readAsProperty(innerType);
+            Property innerProperty = modelReader.readAsProperty(innerType);
             if (innerProperty == null) {
-                Map<String, Model> models = ModelConverters.getInstance().read(innerType);
+                Map<String, Model> models = modelReader.read(innerType);
                 if (models.size() > 0) {
                     for (String name : models.keySet()) {
                         if (!name.contains("java.util")) {
@@ -86,7 +87,7 @@ public class ParameterReader {
                         }
                     }
                 }
-                models = ModelConverters.getInstance().readAll(innerType);
+                models = modelReader.readAll(innerType);
                 if (swagger != null) {
                     for (String key : models.keySet()) {
                         swagger.model(key, models.get(key));
@@ -96,13 +97,13 @@ public class ParameterReader {
                 bp.setSchema(new ArrayModel().items(innerProperty));
                 // creation of ref property doesn't add model to definitions - do it now instead
                 if (innerProperty instanceof RefProperty && swagger != null) {
-                    Map<String, Model> models = ModelConverters.getInstance().read(innerType);
+                    Map<String, Model> models = modelReader.read(innerType);
                     String name = ((RefProperty) innerProperty).getSimpleRef();
                     swagger.addDefinition(name, models.get(name));
                 }
             }
         } else {
-            Map<String, Model> models = ModelConverters.getInstance().read(cls);
+            Map<String, Model> models = modelReader.read(cls);
             if (models.size() > 0) {
                 for (String name : models.keySet()) {
                     if (!name.contains("java.util")) {
@@ -111,14 +112,14 @@ public class ParameterReader {
                             swagger.addDefinition(name, models.get(name));
                     }
                 }
-                models = ModelConverters.getInstance().readAll(cls);
+                models = modelReader.readAll(cls);
                 if (swagger != null) {
                     for (String key : models.keySet()) {
                         swagger.model(key, models.get(key));
                     }
                 }
             } else {
-                Property prop = ModelConverters.getInstance().readAsProperty(cls);
+                Property prop = modelReader.readAsProperty(cls);
                 if (prop != null) {
                     ModelImpl model = new ModelImpl();
                     model.setType(prop.getType());
@@ -136,7 +137,7 @@ public class ParameterReader {
         FormParameter p = new FormParameter().name(param.value());
         if (!defaultValue.isEmpty())
             p.setDefaultValue(defaultValue);
-        Property schema = ModelConverters.getInstance().readAsProperty(cls);
+        Property schema = modelReader.readAsProperty(cls);
         if (schema != null)
             p.setProperty(schema);
         parameter = p;
@@ -149,7 +150,7 @@ public class ParameterReader {
         CookieParameter p = new CookieParameter().name(param.value());
         if (!defaultValue.isEmpty())
             p.setDefaultValue(defaultValue);
-        Property schema = ModelConverters.getInstance().readAsProperty(cls);
+        Property schema = modelReader.readAsProperty(cls);
         if (schema != null)
             p.setProperty(schema);
         parameter = p;
@@ -161,7 +162,7 @@ public class ParameterReader {
         HeaderParam param = annotation;
         HeaderParameter p = new HeaderParameter().name(param.value());
         p.setDefaultValue(defaultValue);
-        Property schema = ModelConverters.getInstance().readAsProperty(cls);
+        Property schema = modelReader.readAsProperty(cls);
         if (schema != null)
             p.setProperty(schema);
         parameter = p;
@@ -174,7 +175,7 @@ public class ParameterReader {
         PathParameter p = new PathParameter().name(param.value());
         if (!defaultValue.isEmpty())
             p.setDefaultValue(defaultValue);
-        Property schema = ModelConverters.getInstance().readAsProperty(cls);
+        Property schema = modelReader.readAsProperty(cls);
         if (schema != null)
             p.setProperty(schema);
         parameter = p;
@@ -188,7 +189,7 @@ public class ParameterReader {
         if (!defaultValue.isEmpty()) {
             p.setDefaultValue(defaultValue);
         }
-        Property schema = ModelConverters.getInstance().readAsProperty(cls);
+        Property schema = modelReader.readAsProperty(cls);
         if (schema != null)
             p.setProperty(schema);
         parameter = p;
