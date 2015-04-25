@@ -16,6 +16,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -206,7 +207,7 @@ public class Reader {
         operation.operationId(method.getName());
 
         //response
-        Class<?> responseClass;
+        Type responseType;
         String responseMsg;
         int responseCode;
 
@@ -231,10 +232,10 @@ public class Reader {
                     apiResponse.container()
             );
         } else {
-            responseClass = method.getReturnType();
+            responseType = method.getGenericReturnType();
             responseMsg = "success response";
             responseCode = 200;
-            readResponse(operation, responseClass, responseMsg, responseCode, ApiContainerType.NONE);
+            readResponse(operation, responseType, responseMsg, responseCode, ApiContainerType.NONE);
         }
 
 
@@ -275,48 +276,66 @@ public class Reader {
         return operation;
     }
 
-    private void readResponse(Operation operation, Class<?> responseClass, String responseMsg, int responseCode, ApiContainerType container) {
-        if (responseClass != null &&
-                !responseClass.equals(Void.class) &&
-                !responseClass.equals(javax.ws.rs.core.Response.class)) {
-            if (isPrimitive(responseClass)) {
+    private void readResponse(Operation operation, Type responseType, String responseMsg, int responseCode, ApiContainerType container) {
+        if (responseType == null) {
+            operation.response(responseCode, new Response().description(responseMsg));
+            return;
+        }
+
+        if (responseType.toString().equals("void")) {
+            operation.response(204, new Response().description(responseMsg));
+            return;
+        }
+
+        Map<String, Model> models;
+
+        if (responseType instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) responseType;
+            for (Type type : pt.getActualTypeArguments()) {
+                models = ModelConverters.getInstance().readAll(type);
+                for (String key : models.keySet()) {
+                    swagger.model(key, models.get(key));
+                }
+            }
+        }
+
+        if (isPrimitive(responseType)) {
+            addResponse(
+                    operation,
+                    ModelConverters.getInstance().readAsProperty(responseType),
+                    responseMsg,
+                    responseCode,
+                    container
+            );
+        } else {
+            models = ModelConverters.getInstance().read(responseType);
+            if (models.size() == 0) {
                 addResponse(
                         operation,
-                        ModelConverters.getInstance().readAsProperty(responseClass),
+                        ModelConverters.getInstance().readAsProperty(responseType),
                         responseMsg,
                         responseCode,
                         container
                 );
             } else {
-                Map<String, Model> models = ModelConverters.getInstance().read(responseClass);
-                if (models.size() == 0) {
+                for (String key : models.keySet()) {
                     addResponse(
                             operation,
-                            ModelConverters.getInstance().readAsProperty(responseClass),
+                            new RefProperty().asDefault(key),
                             responseMsg,
                             responseCode,
                             container
                     );
-                } else {
-                    for (String key : models.keySet()) {
-                        addResponse(
-                                operation,
-                                new RefProperty().asDefault(key),
-                                responseMsg,
-                                responseCode,
-                                container
-                        );
-                        swagger.model(key, models.get(key));
-                    }
-                }
-                models = ModelConverters.getInstance().readAll(responseClass);
-                for (String key : models.keySet()) {
                     swagger.model(key, models.get(key));
                 }
             }
-        } else {
-            operation.response(responseCode, new Response().description(responseMsg));
+
+            models = ModelConverters.getInstance().readAll(responseType);
+            for (String key : models.keySet()) {
+                swagger.model(key, models.get(key));
+            }
         }
+
     }
 
     private void addResponse(Operation operation, Property property, String responseMsg, int responseCode, ApiContainerType container) {
@@ -348,7 +367,7 @@ public class Reader {
         return parameterReader.extractParameters(annotations, cls);
     }
 
-    boolean isPrimitive(Class<?> cls) {
+    boolean isPrimitive(Type cls) {
         Property property = ModelConverters.getInstance().readAsProperty(cls);
 
         if (property == null)
@@ -358,6 +377,7 @@ public class Reader {
             case "integer":
             case "number":
             case "boolean":
+            case "string":
             case "array":
             case "file":
                 return true;

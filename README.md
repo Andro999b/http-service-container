@@ -270,19 +270,5 @@ logback из короби содержит [appenders](http://logback.qos.ch/man
 * и т.д.
 
 Исключения наследуемы не от WebApplicationException возвращяются в ответе со статусом 500
-
-#OkResponse
-Jersey игнорирует все void методы. Однако часто нужно вызвать метод который не возвращяет значение, для этого можно использовать OkResponse класс. 
-
-    @GET
-    @Path("void")
-    @Produces({"application/json"})
-    public Response getVoid(){
-        return OkResponse.build();
-    }
-    
-Ответ: 
-
-    {"msg": "success response"}
     
     
