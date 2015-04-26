@@ -285,7 +285,7 @@ public class Reader {
     }
 
     private void readResponse(Operation operation, Type responseType, String responseMsg, int responseCode, ApiContainerType container) {
-        if (responseType == null) {
+        if (responseType == null || ignoreResponseModel(responseType)) {
             operation.response(responseCode, new Response().description(responseMsg));
             return;
         }
@@ -344,6 +344,17 @@ public class Reader {
             }
         }
 
+    }
+
+    private boolean ignoreResponseModel(Type responseType) {
+        if (responseType instanceof Class) {
+            Class responseClass = (Class) responseType;
+
+            if (javax.ws.rs.core.Response.class.isAssignableFrom(responseClass))
+                return true;
+        }
+
+        return false;
     }
 
     private void addResponse(Operation operation, Property property, String responseMsg, int responseCode, ApiContainerType container) {
