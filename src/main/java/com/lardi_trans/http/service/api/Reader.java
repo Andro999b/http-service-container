@@ -138,6 +138,10 @@ public class Reader {
                 }
             }
 
+            if(operation.getProduces() == null){
+                operation.produces("text/plain");
+            }
+
             addMethodDescription(resource, method, operation);
 
             Path path = swagger.getPath(operationPath);

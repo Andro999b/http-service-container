@@ -105,6 +105,7 @@ public class InfoResource {
     @GET
     @Path("health")
     @ApiMethod("Return service health checks")
+    @Produces({"application/json"})
     @ApiResponses({
             @ApiResponse("Service health checks"),
             @ApiResponse(value = "Heathcheck not available", httpCode = 500)
