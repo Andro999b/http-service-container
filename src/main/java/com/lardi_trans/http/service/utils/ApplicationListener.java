@@ -44,7 +44,7 @@ public class ApplicationListener implements ApplicationEventListener {
                         LOGGER.error("Exception on request {} ", event.getUriInfo().getAbsolutePath(), event.getException());
                     }
                     break;
-                case RESOURCE_METHOD_START:
+                case START:
                     startTime = System.currentTimeMillis();
                     break;
                 case FINISHED:
