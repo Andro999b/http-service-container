@@ -7,6 +7,7 @@ import com.codahale.metrics.health.SharedHealthCheckRegistries;
 import com.codahale.metrics.jvm.ThreadDump;
 import com.lardi_trans.http.service.api.annotation.*;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
@@ -17,6 +18,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
@@ -27,6 +30,7 @@ import java.lang.management.MemoryUsage;
 import java.lang.management.RuntimeMXBean;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SortedMap;
 
 
 /**
@@ -40,7 +44,7 @@ public class InfoResource {
 
     @GET
     @Path("config")
-    @Produces({"application/json"})
+    @Produces({MediaType.APPLICATION_JSON})
     @ApiMethod("Service effective (with all default values) config file")
     @Metered
     public HttpServiceConfig getConfig(){
@@ -49,7 +53,7 @@ public class InfoResource {
 
     @GET
     @Path("info")
-    @Produces({"application/json"})
+    @Produces({MediaType.APPLICATION_JSON})
     @ApiMethod("Service information")
     @ApiResponse("uptime, start time, systemLoad, heap usage, systemProperties")
     @Timed
@@ -88,7 +92,7 @@ public class InfoResource {
 
     @GET
     @Path("threads/dump")
-    @Produces({"text/plain"})
+    @Produces({MediaType.TEXT_PLAIN})
     @ApiIgnore
     public StreamingOutput getThreadsDump() throws Exception {
         return new StreamingOutput() {
@@ -105,14 +109,23 @@ public class InfoResource {
     @GET
     @Path("health")
     @ApiMethod("Return service health checks")
-    @Produces({"application/json"})
+    @Produces({MediaType.APPLICATION_JSON})
     @ApiResponses({
             @ApiResponse("Service health checks"),
+            @ApiResponse(value = "Heathcheck fail", httpCode = 500),
             @ApiResponse(value = "Heathcheck not available", httpCode = 500)
     })
-    public Map<String, HealthCheck.Result> getHealthCheck() {
-        if (SharedHealthCheckRegistries.names().contains("healthCheck"))
-            return SharedHealthCheckRegistries.getOrCreate("healthCheck").runHealthChecks();
+    public Response getHealthCheck() {
+        if (SharedHealthCheckRegistries.names().contains("healthCheck")) {
+            SortedMap<String, HealthCheck.Result> healthCheck = SharedHealthCheckRegistries.getOrCreate("healthCheck").runHealthChecks();
+
+            for (HealthCheck.Result result : healthCheck.values()) {
+                if(!result.isHealthy())
+                    return Response.serverError().entity(healthCheck).build();
+            }
+
+            return Response.ok(healthCheck).build();
+        }
 
         throw new WebServiceException("Heathcheck not available");
     }
