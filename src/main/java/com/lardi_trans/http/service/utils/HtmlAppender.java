@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class HtmlAppender extends AppenderBase<ILoggingEvent> {
     public static final int MAX_RECORDS = 150;
-    public static final String DEFAULT_CONVERSION_PATTERN = "%date%level%logger{36}%msg";
+    public static final String DEFAULT_CONVERSION_PATTERN = "%date%level%logger{50}%msg";
 
     private CyclicBuffer<ILoggingEvent> cb = new CyclicBuffer<>(MAX_RECORDS);
     private String pattern;

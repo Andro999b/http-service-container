@@ -1,7 +1,7 @@
 package com.lardi_trans.http.service.resources;
 
-import com.codahale.metrics.annotation.Metered;
 import com.lardi_trans.http.service.api.annotation.ApiIgnore;
+import com.lardi_trans.http.service.config.HttpServiceConfig;
 import com.lardi_trans.http.service.error.HttpServiceError;
 import com.wordnik.swagger.models.Swagger;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -20,8 +20,11 @@ import javax.ws.rs.core.Response;
 @Path("/")
 @ApiIgnore
 public class ApiResource {
+    public static final String WEB_FOLDER = "/web";
     @Inject
     Swagger swagger;
+    @Inject
+    HttpServiceConfig config;
 
     @GET
     @Path("api")
@@ -36,38 +39,39 @@ public class ApiResource {
     @GET
     @Produces({MediaType.TEXT_HTML + ";charset=utf-8"})
     public Viewable getSwaggerUi() {
-        return new Viewable("/swagger-ui/index.html", this);
+        return new Viewable(WEB_FOLDER + "/" + config.getWebIndexPage(), this);
     }
 
     @GET
     @Path("{template}")
+    @Produces({MediaType.TEXT_HTML + ";charset=utf-8"})
     public Viewable getSwaggerUi(@PathParam("template") String template) {
-        return new Viewable("/swagger-ui/" + template, this);
+        return new Viewable(WEB_FOLDER + "/" + template, this);
     }
 
     @GET
     @Path("css/{template}")
     @Produces({"text/css"})
     public Viewable getSwaggerUiCss(@PathParam("template") String template) {
-        return new Viewable("/swagger-ui/css/" + template, this);
+        return new Viewable(WEB_FOLDER + "/css/" + template, this);
     }
 
     @GET
     @Path("lib/{template}")
     @Produces({"application/javascript"})
     public Viewable getSwaggerUiLib(@PathParam("template") String template) {
-        return new Viewable("/swagger-ui/lib/" + template, this);
+        return new Viewable(WEB_FOLDER + "/lib/" + template, this);
     }
 
     @GET
     @Path("fonts/{template}")
     public Viewable getSwaggerUiFonts(@PathParam("template") String template) {
-        return new Viewable("/swagger-ui/fonts/" + template, this);
+        return new Viewable(WEB_FOLDER + "/fonts/" + template, this);
     }
 
     @GET
     @Path("images/{template}")
     public Viewable getSwaggerUiImages(@PathParam("template") String template) {
-        return new Viewable("/swagger-ui/images/" + template, this);
+        return new Viewable(WEB_FOLDER + "/images/" + template, this);
     }
 }

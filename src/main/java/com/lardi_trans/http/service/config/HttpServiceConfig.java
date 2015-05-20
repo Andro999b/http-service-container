@@ -29,6 +29,7 @@ public class HttpServiceConfig {
     private int port = 9999;
     private String applicationClass;
     private String constantsUrl;
+    private String webIndexPage = "api.html";
     private List<String> resourcesPackages = new ArrayList<>();
     private Map<String, Object> properties = new HashMap<>();
     private int slowRequestLogTime = 1000;
@@ -132,5 +133,9 @@ public class HttpServiceConfig {
 
     public int getSlowRequestLogTime() {
         return slowRequestLogTime;
+    }
+
+    public String getWebIndexPage() {
+        return webIndexPage;
     }
 }
