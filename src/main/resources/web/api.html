@@ -28,7 +28,7 @@
                 dom_id: "swagger-ui-container",
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
                 onComplete: function (swaggerApi, swaggerUi) {
-                    hackForCORS();
+                    hack();
                     $('pre code').each(function (i, e) {
                         hljs.highlightBlock(e)
                     });
@@ -48,7 +48,7 @@
                 }
             }
 
-            function hackForCORS() {
+            function hack() {
                 var api = window.swaggerUi.api;
                 var location = window.location;
                 var basePath = location.pathname;
@@ -61,11 +61,12 @@
                     var module = api.apisArray[i1];
                     for (var i2 in module.operationsArray) {
                         var operation = module.operationsArray[i2];
-
                         operation.host = location.host;
                         operation.basePath = basePath;
                     }
                 }
+
+                api.basePath = api.host + basePath;
             }
         });
 
