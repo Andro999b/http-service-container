@@ -21,7 +21,8 @@
 
     <script type="text/javascript">
         $(function () {
-            var url = "api";
+            var url = location.origin + "/" + location.pathname + "/api";
+
             window.swaggerUi = new SwaggerUi({
                 url: url,
                 validatorUrl: null,
@@ -50,7 +51,6 @@
 
             function hack() {
                 var api = window.swaggerUi.api;
-                var location = window.location;
                 var basePath = location.pathname;
 
                 if (basePath.length > 0 && basePath.charAt(basePath.length - 1) === "/") {
