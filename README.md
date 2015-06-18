@@ -200,7 +200,7 @@ Api генерируется автоматически по аннотация�
 
 #Логи
 Для логирования используется [slf4j](http://www.slf4j.org/) который является стандартом дефакто для большества соврменных фреймворков.<br/>
-Для вывода логов используется [logback](http://logback.qos.ch/). [Чем logback крутче log4j](http://logback.qos.ch/reasonsToSwitch.html)<br/>
+Для вывода логов используется [logback](http://logback.qos.ch/). <br/>
 logback из короби содержит [appenders](http://logback.qos.ch/manual/appenders.html)
 позволяюших рассылать логи удаленно(ServerSocketAppender, SSLServerSocketAppender, SMTPAppender),
 записывать логи в базуданных(DBAppender), в Syslog(SyslogAppender). Такж есть поддержка [Graylog2](https://github.com/Moocar/logback-gelf)
