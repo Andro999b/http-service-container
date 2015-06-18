@@ -16,12 +16,12 @@
     
 Сервер запустится с конфигурацией по умолчанию:
 
-    13:31:59.750 [com.lardi_trans.http.service.Bootstrap.main()] INFO  o.g.g.http.server.NetworkListener - Started listener bound to [localhost:9999]<br/>
-    13:31:59.762 [com.lardi_trans.http.service.Bootstrap.main()] INFO  o.g.grizzly.http.server.HttpServer - [HttpServer] Started.<br/>
+    13:31:59.750 [com.lardi_trans.http.service.Bootstrap.main()] INFO  o.g.g.http.server.NetworkListener - Started listener bound to [localhost:9999]
+    13:31:59.762 [com.lardi_trans.http.service.Bootstrap.main()] INFO  o.g.grizzly.http.server.HttpServer - [HttpServer] Started.
     13:31:59.763 [com.lardi_trans.http.service.Bootstrap.main()] INFO  c.lardi_trans.http.service.Bootstrap - Start service at http://localhost:9999<br/>
-    13:31:59.764 [com.lardi_trans.http.service.Bootstrap.main()] INFO  c.lardi_trans.http.service.Bootstrap - Wadl available by http://localhost:9999/application.wadl<br/>
-    13:31:59.764 [com.lardi_trans.http.service.Bootstrap.main()] INFO  c.lardi_trans.http.service.Bootstrap - Swagger api available by http://localhost:9999/api<br/>
-    13:31:59.765 [com.lardi_trans.http.service.Bootstrap.main()] WARN  c.lardi_trans.http.service.Bootstrap - lardi constants soa not available<br/>
+    13:31:59.764 [com.lardi_trans.http.service.Bootstrap.main()] INFO  c.lardi_trans.http.service.Bootstrap - Wadl available by http://localhost:9999/application.wadl
+    13:31:59.764 [com.lardi_trans.http.service.Bootstrap.main()] INFO  c.lardi_trans.http.service.Bootstrap - Swagger api available by http://localhost:9999/api
+    13:31:59.765 [com.lardi_trans.http.service.Bootstrap.main()] WARN  c.lardi_trans.http.service.Bootstrap - lardi constants soa not available
 
 
 #Конфигурация
@@ -42,7 +42,7 @@
       "path": "", //Базовый путь в урл
       "port": 9999, //Порт сервера
       "resourcesPackages": [], //Списоке пакетов, в которых jersey будет искать рессурсы
-      "properties": { //сободный набор переменных дступных в контейне
+      "properties": { //свободный набор переменных доступных в контейнере
         "jersey.config.server.monitoring.enabled": true
       },
       "slowRequestLogTime": 1000 //Логирование медленных запросов
