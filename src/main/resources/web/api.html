@@ -21,17 +21,21 @@
 
     <script type="text/javascript">
         $(function () {
-            var pattern = /^(http|https):\/\/([^\/]+)(\/[^\/\.]*)?\/.+$/i;
+            var pattern = /^(http|https):\/\/([^\/]+)(\/[^\/\.]*)?(\/[^\/]*)?$/i;
             var result = pattern.exec(location.href);
+
+            console.log(result);
+
             var baseUrl = result[1] + "://" + result[2];
 
             if(result[3]){
                 baseUrl += result[3];
             }
 
-            console.log(result, baseUrl);
+            if(baseUrl.charAt(baseUrl.length - 1) !== '/')
+                baseUrl += '/';
 
-            var apiUrl = baseUrl + "/api";
+            var apiUrl = baseUrl + "api";
 
             window.swaggerUi = new SwaggerUi({
                 url: apiUrl,
