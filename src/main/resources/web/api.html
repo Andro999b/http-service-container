@@ -21,10 +21,20 @@
 
     <script type="text/javascript">
         $(function () {
-            var url = location.origin + "/" + location.pathname + "/api";
+            var pattern = /^(http|https):\/\/([^\/]+)(\/[^\/\.]*)?\/.+$/i;
+            var result = pattern.exec(location.href);
+            var baseUrl = result[1] + "://" + result[2];
+
+            if(result[3]){
+                baseUrl += result[3];
+            }
+
+            console.log(result, baseUrl);
+
+            var apiUrl = baseUrl + "/api";
 
             window.swaggerUi = new SwaggerUi({
-                url: url,
+                url: apiUrl,
                 validatorUrl: null,
                 dom_id: "swagger-ui-container",
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
@@ -51,11 +61,6 @@
 
             function hack() {
                 var api = window.swaggerUi.api;
-                var basePath = location.pathname;
-
-                if (basePath.length > 0 && basePath.charAt(basePath.length - 1) === "/") {
-                    basePath = basePath.substr(0, basePath.length - 1);
-                }
 
                 for (var i1 in api.apisArray) {
                     var module = api.apisArray[i1];
@@ -67,8 +72,6 @@
                 }
             }
         });
-
-
     </script>
 </head>
 
