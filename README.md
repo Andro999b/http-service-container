@@ -231,29 +231,7 @@ Api генерируется автоматически по аннотация�
     <appender name="HTML" class="com.lardi_trans.http.service.utils.HtmlAppender">
         <pattern>%date%level%logger{36}%msg</pattern>
     </appender>
-    
-В classpath находится файл конфигурации по умолчанию:
 
-    <configuration debug="true">
-        <appender name="HTML" class="com.lardi_trans.http.service.utils.HtmlAppender">
-            <reversePrint>true</reversePrint>
-        </appender>
-    
-        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-            </encoder>
-        </appender>
-    
-        <root level="debug">
-            <appender-ref ref="HTML"/>
-            <appender-ref ref="STDOUT"/>
-        </root>
-    
-        <logger name="com.wordnik.swagger" level="INFO"/>
-    </configuration>
-    
-Сервер по умолчанию логирует медленные запросы и ошибки во время запросов.
 
 #Исключения
 Для контролируеммых ошибок(ошибки логики, ошибки которые должен обработать клиент и тд), можно использотвать исключение WebApplicationException.
