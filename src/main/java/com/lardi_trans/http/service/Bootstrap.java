@@ -93,18 +93,20 @@ public class Bootstrap {
                 throw new RuntimeException("applicationClass must inheritance from HttpServiceApplication!");
             }
         } catch (Exception e) {
+            LOGGER.error("Fail to create application: {}", applicationClassName);
             System.out.println("Fail to create application: " + applicationClassName);
             throw e;
         }
     }
 
     private void doCorrectShutdown() {
-        System.out.println("Wait for http server shutdown...");
+        LOGGER.info("Wait for http server shutdown...");
+
         try {
             server.shutdown().get();
-            System.out.println("Shutdown ok...");
+            LOGGER.info("Shutdown ok...");
         } catch (Exception e) {
-            System.out.println("Error while server shutdown!");
+            LOGGER.error("Error while server shutdown!");
             e.printStackTrace();
         }
     }
