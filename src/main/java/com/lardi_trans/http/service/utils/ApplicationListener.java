@@ -17,6 +17,7 @@ import java.beans.ExceptionListener;
  */
 public class ApplicationListener implements ApplicationEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionListener.class);
+    private static final Logger SLOW_REQUEST_LOGGER = LoggerFactory.getLogger("slow.request");
 
     @Inject
     private HttpServiceConfig config;
@@ -51,7 +52,7 @@ public class ApplicationListener implements ApplicationEventListener {
                     if (startTime > 0) {
                         long requestTime = System.currentTimeMillis() - startTime;
                         if (requestTime >= config.getSlowRequestLogTime()) {
-                            LOGGER.error("Slow request {}. Execution time is {}", event.getUriInfo().getAbsolutePath(), requestTime);
+                            SLOW_REQUEST_LOGGER.error("Slow request {}. Execution time is {}", event.getUriInfo().getAbsolutePath(), requestTime);
                         }
                     }
                     break;
