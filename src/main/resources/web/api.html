@@ -21,15 +21,16 @@
 
     <script type="text/javascript">
         $(function () {
-            var pattern = /^(http|https):\/\/([^\/]+)(\/[^\/\.]*)?(\/[^\/]*)?$/i;
+            var pattern = /^(http|https):\/\/([^\/]+)(\/[a-zA-Z0-9]*)?(\/.*)?$/i;
             var result = pattern.exec(location.href);
 
-            console.log(result);
-
+            var host = result[2];
+            var path = "";
             var baseUrl = result[1] + "://" + result[2];
 
             if(result[3]){
                 baseUrl += result[3];
+                path = result[3];
             }
 
             if(baseUrl.charAt(baseUrl.length - 1) !== '/')
@@ -70,8 +71,8 @@
                     var module = api.apisArray[i1];
                     for (var i2 in module.operationsArray) {
                         var operation = module.operationsArray[i2];
-                        operation.host = location.host;
-                        operation.basePath = basePath;
+                        operation.host = host;
+                        operation.basePath = path;
                     }
                 }
             }
