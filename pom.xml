@@ -10,7 +10,7 @@
 
     <properties>
         <jersey.version>2.17</jersey.version>
-        <joda-time.version>2.7</joda-time.version>
+        <joda-time.version>2.8.1</joda-time.version>
         <grizzly.version>2.3.16</grizzly.version>
         <swagger.version>1.5.3-M1</swagger.version>
         <commons-lang3.version>3.3.2</commons-lang3.version>

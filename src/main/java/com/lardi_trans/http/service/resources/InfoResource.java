@@ -7,9 +7,8 @@ import com.codahale.metrics.health.SharedHealthCheckRegistries;
 import com.codahale.metrics.jvm.ThreadDump;
 import com.lardi_trans.http.service.api.annotation.*;
 import com.lardi_trans.http.service.config.HttpServiceConfig;
-import org.glassfish.grizzly.http.util.HttpStatus;
 import org.joda.time.DateTime;
-import org.joda.time.Period;
+import org.joda.time.Interval;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -28,6 +27,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.management.RuntimeMXBean;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
@@ -57,37 +58,42 @@ public class InfoResource {
     @ApiMethod("Service information")
     @ApiResponse("uptime, start time, systemLoad, heap usage, systemProperties")
     @Timed
-    public Map<String, Object> getIndex(){
-        Map<String, Object> metrics = new LinkedHashMap<>();
+    public Map<String, Object> getInfo() {
+        Map<String, Object> info = new LinkedHashMap<>();
 
         //uptime
         RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
 
-        Period uptime = new Period(runtimeMXBean.getUptime());
         PeriodFormatter periodFormatter = new PeriodFormatterBuilder()
-                .printZeroAlways()
+                .printZeroIfSupported()
                 .appendDays().appendLiteral("d ")
                 .appendHours().appendLiteral("h ")
                 .appendMinutes().appendLiteral("m ")
                 .appendSeconds().appendLiteral("s")
                 .toFormatter();
 
-        metrics.put("uptime", periodFormatter.print(uptime));
-        metrics.put("startTime", new DateTime(runtimeMXBean.getStartTime()).toString("yyyy-MM-dd h:mm:ss a"));
+        info.put("uptime", periodFormatter.print(new Interval(0, runtimeMXBean.getUptime()).toPeriod()));
+        info.put("startTime", new DateTime(runtimeMXBean.getStartTime()).toString("yyyy-MM-dd h:mm:ss a"));
+
+        try {
+            info.put("domainName", InetAddress.getLocalHost().getHostName());
+        } catch (UnknownHostException e) {
+            //nop
+        }
 
         double systemLoadAverage = ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
-        metrics.put("systemLoad", systemLoadAverage);
+        info.put("systemLoad", systemLoadAverage);
         //memory
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
         MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
-        metrics.put("Heap Usage", heapMemoryUsage.getUsed());
-        metrics.put("Heap Max", heapMemoryUsage.getMax());
+        info.put("Heap Usage", heapMemoryUsage.getUsed());
+        info.put("Heap Max", heapMemoryUsage.getMax());
 
         //system properties
-        metrics.put("systemProperties", runtimeMXBean.getSystemProperties());
+        info.put("systemProperties", runtimeMXBean.getSystemProperties());
 
-        return metrics;
+        return info;
     }
 
     @GET
