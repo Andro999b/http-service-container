@@ -139,7 +139,7 @@ Api генерируется автоматически по аннотация�
 
 @Timed - метрика времени выполнения запроса и вызовов за секунду:
 
-    "getInfo": {
+    "com.lardi_trans.http.service.resources.InfoResource.getIndex": {
         "count": 1,
         "max": 53.490279,
         "mean": 53.490279,
@@ -199,11 +199,7 @@ Api генерируется автоматически по аннотация�
 [Больше о метриках и heath checks](https://dropwizard.github.io/metrics/3.1.0/)
 
 #Логи
-Для логирования используется [slf4j](http://www.slf4j.org/) который является стандартом дефакто для большества соврменных фреймворков.<br/>
 Для вывода логов используется [logback](http://logback.qos.ch/). <br/>
-logback из короби содержит [appenders](http://logback.qos.ch/manual/appenders.html)
-позволяюших рассылать логи удаленно(ServerSocketAppender, SSLServerSocketAppender, SMTPAppender),
-записывать логи в базуданных(DBAppender), в Syslog(SyslogAppender). Такж есть поддержка [Graylog2](https://github.com/Moocar/logback-gelf)
 
 Для совместимости log4j c slf4j можно использовать:
 
@@ -235,29 +231,7 @@ logback из короби содержит [appenders](http://logback.qos.ch/man
     <appender name="HTML" class="com.lardi_trans.http.service.utils.HtmlAppender">
         <pattern>%date%level%logger{36}%msg</pattern>
     </appender>
-    
-В classpath находится файл конфигурации по умолчанию:
 
-    <configuration debug="true">
-        <appender name="HTML" class="com.lardi_trans.http.service.utils.HtmlAppender">
-            <reversePrint>true</reversePrint>
-        </appender>
-    
-        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-            </encoder>
-        </appender>
-    
-        <root level="debug">
-            <appender-ref ref="HTML"/>
-            <appender-ref ref="STDOUT"/>
-        </root>
-    
-        <logger name="com.wordnik.swagger" level="INFO"/>
-    </configuration>
-    
-Сервер по умолчанию логирует медленные запросы и ошибки во время запросов.
 
 #Исключения
 Для контролируеммых ошибок(ошибки логики, ошибки которые должен обработать клиент и тд), можно использотвать исключение WebApplicationException.

@@ -19,7 +19,7 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 @ApiIgnore
-public class ApiResource {
+public class WebResource {
     public static final String WEB_FOLDER = "/web";
     @Inject
     Swagger swagger;

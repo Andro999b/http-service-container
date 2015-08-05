@@ -6,7 +6,7 @@
 
     <groupId>lardi-trans.com</groupId>
     <artifactId>http-service</artifactId>
-    <version>1.0.35</version>
+    <version>1.0.42</version>
 
     <properties>
         <jersey.version>2.17</jersey.version>

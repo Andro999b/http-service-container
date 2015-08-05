@@ -24,7 +24,7 @@ public class HttpServiceConfig {
 
     private String title = "HTTP service";
     private NetworkConfig networkConfig = new NetworkConfig();
-    private String host = "localhost";
+    private String host = "0.0.0.0";
     private String path = "";
     private int port = 9999;
     private String applicationClass;
