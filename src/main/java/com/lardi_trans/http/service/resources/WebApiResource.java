@@ -19,8 +19,9 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 @ApiIgnore
-public class WebResource {
+public class WebApiResource {
     public static final String WEB_FOLDER = "/web";
+    public static final String WEB_PATH_PREFIX = "web/";
     @Inject
     Swagger swagger;
     @Inject
@@ -43,34 +44,34 @@ public class WebResource {
     }
 
     @GET
-    @Path("{template}")
+    @Path(WEB_PATH_PREFIX + "{template}")
     @Produces({MediaType.TEXT_HTML + ";charset=utf-8"})
     public Viewable getSwaggerUi(@PathParam("template") String template) {
         return new Viewable(WEB_FOLDER + "/" + template, this);
     }
 
     @GET
-    @Path("css/{template}")
+    @Path(WEB_PATH_PREFIX + "css/{template}")
     @Produces({"text/css"})
     public Viewable getSwaggerUiCss(@PathParam("template") String template) {
         return new Viewable(WEB_FOLDER + "/css/" + template, this);
     }
 
     @GET
-    @Path("lib/{template}")
+    @Path(WEB_PATH_PREFIX + "lib/{template}")
     @Produces({"application/javascript"})
     public Viewable getSwaggerUiLib(@PathParam("template") String template) {
         return new Viewable(WEB_FOLDER + "/lib/" + template, this);
     }
 
     @GET
-    @Path("fonts/{template}")
+    @Path(WEB_PATH_PREFIX + "fonts/{template}")
     public Viewable getSwaggerUiFonts(@PathParam("template") String template) {
         return new Viewable(WEB_FOLDER + "/fonts/" + template, this);
     }
 
     @GET
-    @Path("images/{template}")
+    @Path(WEB_PATH_PREFIX + "images/{template}")
     public Viewable getSwaggerUiImages(@PathParam("template") String template) {
         return new Viewable(WEB_FOLDER + "/images/" + template, this);
     }
