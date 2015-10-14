@@ -25,6 +25,18 @@ import java.util.Map;
 @Produces({"application/json"})
 @ApiCategory("service")
 public class UrlStatisticResource {
+    private static String[] filterUrl = {
+            "/web",
+            "/statistic",
+            "/metrics",
+            "/api",
+            "/application.wadl",
+            "/log",
+            "/threads",
+            "/config",
+            "/info",
+            "/health"
+    };
     @Inject
     Provider<MonitoringStatistics> monitoringStatisticsProvider;
 
@@ -75,8 +87,16 @@ public class UrlStatisticResource {
 
         Map<String, Object> out = new HashMap<>();
 
+        next:
         for (Map.Entry<String, ResourceStatistics> entry : uriStatistics.entrySet()) {
             String uri = entry.getKey();
+
+            for (String filter : filterUrl) {
+                if (uri.startsWith(filter)) {
+                    continue next;
+                }
+            }
+
             ResourceStatistics resourceStatistics = entry.getValue();
             out.put(uri, makeResourceStatistic(resourceStatistics, timeWindow));
         }

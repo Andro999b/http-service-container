@@ -1,5 +1,5 @@
 {
   "properties": {
-    "jersey.config.server.monitoring.enabled": false
+    "jersey.config.server.monitoring.enabled": true
   }
 }
