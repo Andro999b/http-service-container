@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Monitoring</title>
+    <link href="/web/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/web/css/bootstrap-theme.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+    <h1>Monitoring</h1>
+    <hr/>
+    <div class="container">
+        <div id="memory"></div>
+        <div id="cpu"></div>
+        <div id="threads"></div>
+    </div>
+</div>
+<script type="text/javascript" src="/web/lib/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/web/lib/underscore-min.js"></script>
+<script type="text/javascript" src="/web/lib/backbone-min.js"></script>
+<script type="text/javascript" src="/web/lib/highcharts.js"></script>
+<script type="text/javascript">
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
+
+    $(function () {
+        const timeWindow = 300;
+        const timeout = 1;
+        const maxDataSetSize = timeWindow / timeout;
+        const InfoModel = Backbone.Model.extend({
+            "url": "/info"
+        });
+
+        const charts = {
+            memory: {
+                type: "line",
+                series: ["heapMax", "heapUsage"],
+                "yLabel": "Bytes",
+                colors: ["#D28C32", "#4D96A5"]
+            },
+            cpu: {
+                type: "line",
+                series: ["systemLoad"],
+                "yLabel": "Cpu Load",
+                colors: ["#4D96A5"]
+            },
+            threads: {
+                type: "line",
+                series: ["threadsCount"],
+                "yLabel": "Threads Count",
+                colors: ["#4D96A5"]
+            }
+        };
+
+        var series = {};
+        var infoModel = new InfoModel();
+
+        infoModel.on("change", function (m) {
+            addNewMetric(m.toJSON());
+        });
+
+        setInterval(function () {
+            infoModel.fetch();
+        }, timeout * 1000);
+
+        _.each(_.keys(charts), function (key) {
+            initChart(key);
+        });
+
+        function addNewMetric(metrics) {
+            var time = (new Date()).getTime();
+
+            _.each(metrics, function (val, key) {
+                if (series.hasOwnProperty(key)) {
+                    series[key].addPoint({
+                        x: time,
+                        y: val
+                    }, true, true);
+                }
+            });
+        }
+
+        function initChart(charName) {
+            var config = charts[charName];
+
+            var options = {
+                chart: {
+                    type: config["type"],
+                    events: {
+                        load: function () {
+                            _.each(this.series, function (val) {
+                                series[val.name] = val;
+                            })
+                        }
+                    }
+                },
+                title: {
+                    text: charName
+                },
+                yAxis: {
+                    title: {
+                        text: config["yLabel"]
+                    },
+                    labels: {
+                        formatter: function () {
+                            const k = 1000;
+                            const m = k * 1000;
+                            const g = m * 1000;
+
+                            var v = this.value;
+                            return v < k ? v : (v < m ? v / k + "K" : (v < g ? v / m + "M" : v / g + "G"))
+                        }
+                    }
+                },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 150
+                },
+                series: []
+            };
+
+            if (config.hasOwnProperty("colors")) {
+                options["colors"] = config["colors"];
+            }
+
+            _.each(config.series, function (sname) {
+                var data = [];
+                var time = (new Date()).getTime();
+
+                _.times(maxDataSetSize, function () {
+                    data.push({
+                        x: time,
+                        y: 0
+                    });
+                });
+
+                var serie = {
+                    name: sname,
+                    data: data
+                };
+
+                options.series.push(serie);
+            });
+
+            $("#" + charName).highcharts(options);
+        }
+    });
+</script>
+</body>
+</html>

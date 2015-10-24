@@ -23,10 +23,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.xml.ws.WebServiceException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
-import java.lang.management.RuntimeMXBean;
+import java.lang.management.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
@@ -87,8 +84,11 @@ public class InfoResource {
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
         MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
-        info.put("Heap Usage", heapMemoryUsage.getUsed());
-        info.put("Heap Max", heapMemoryUsage.getMax());
+        info.put("heapUsage", heapMemoryUsage.getUsed());
+        info.put("heapMax", heapMemoryUsage.getMax());
+
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        info.put("threadsCount", threadMXBean.getThreadCount());
 
         //system properties
         info.put("systemProperties", runtimeMXBean.getSystemProperties());
